@@ -1,6 +1,7 @@
 # recorder
 
-A new Flutter project.
+- 進度:
+  - recorder without timing: 可錄音與播放，但是上方秒數無法正常計時。 
 
 ## Getting Started
 

@@ -1,7 +1,7 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initializer() async {
     pathToAudio = '/sdcard/Download/temp.wav';
     // _recordingSession = FlutterSoundRecorder();
-    await _recordingSession.openRecorder(
+    await _recordingSession.openAudioSession(
         focus: AudioFocus.requestFocusAndStopOthers,
         category: SessionCategory.playAndRecord,
         mode: SessionMode.modeDefault,
@@ -190,41 +190,36 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> startRecording() async {
-
-    
     Directory directory = Directory(path.dirname(pathToAudio));
     if (!directory.existsSync()) {
       directory.createSync();
     }
-    _recordingSession.openRecorder();
+    _recordingSession.openAudioSession();
     await _recordingSession.startRecorder(
       toFile: pathToAudio,
       codec: Codec.pcm16WAV,
     );
 
-
     if (_recordingSession.onProgress != null) {
       // ignore: no_leading_underscores_for_local_identifiers
-    StreamSubscription _recorderSubscription =
-        _recordingSession.onProgress.listen((e) {
-      var date = DateTime.fromMillisecondsSinceEpoch(e.duration.inMilliseconds,
-          isUtc: true);
-      var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
-      setState(() {
-        _timerText = timeText; //.substring(0, 8)
-      });
-    }, onError: (err) {
-      print(err);
-    }, onDone: () {
-      print('subscription done!!');
-    }, cancelOnError: false);
+      StreamSubscription _recorderSubscription =
+          _recordingSession.onProgress!.listen((e) {
+        var date = DateTime.fromMillisecondsSinceEpoch(
+            e.duration.inMilliseconds,
+            isUtc: true);
+        var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
+        setState(() {
+          _timerText = timeText; //.substring(0, 8)
+        });
+      }, onError: (err) {
+        print(err);
+      }, onDone: () {
+        print('subscription done!!');
+      }, cancelOnError: false);
 
-    _recorderSubscription.cancel();
-    print(_timerText);
+      _recorderSubscription.cancel();
+      print(_timerText);
     }
-
-    
-
   }
 
   Future<String?> stopRecording() async {
