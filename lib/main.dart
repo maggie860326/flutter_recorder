@@ -42,6 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   FlutterSoundRecorder? myRecorder = FlutterSoundRecorder();
   StreamSubscription? _recorderSubscription;
   final recordingPlayer = AssetsAudioPlayer();
+  String _recorderState = "Stopped";
   String pathToAudio = "";
   bool _playAudio = false;
   bool _isRecording = false;
@@ -98,8 +99,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Center(
               child: Text(
-                getRecorderState(),
-                style: const TextStyle(fontSize: 70, color: Colors.white),
+                _recorderState,
+                style: const TextStyle(fontSize: 40, color: Colors.white),
               ),
             ),
             const SizedBox(
@@ -121,8 +122,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() {
                   _isRecording = !_isRecording;
                 });
-                if (_isRecording) stopRecording();
-                if (!_isRecording) startRecording();
+                if (_isRecording) {
+                  startRecording();
+                } else {
+                  stopRecording();
+                }
               },
               icon: _isRecording
                   ? const Icon(
@@ -141,8 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() {
                   _playAudio = !_playAudio;
                 });
-                if (_playAudio) playFunc();
-                if (!_playAudio) stopPlayFunc();
+                if (_playAudio) {
+                  playFunc();
+                } else {
+                  stopPlayFunc();
+                }
               },
               icon: _playAudio
                   ? const Icon(
@@ -196,15 +203,23 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  String getRecorderState() {
+  void getRecorderState() {
     if (myRecorder!.isStopped) {
-      return "Stopped";
+      setState(() {
+        _recorderState = "Stopped";
+      });
     } else if (myRecorder!.isRecording) {
-      return "Recording";
+      setState(() {
+        _recorderState = "Recording";
+      });
     } else if (myRecorder!.isPaused) {
-      return "Paused";
+      setState(() {
+        _recorderState = "Paused";
+      });
     } else {
-      return "Unknown";
+      setState(() {
+        _recorderState = "Unknown";
+      });
     }
   }
 
@@ -229,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
               isUtc: true);
           var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
           setState(() {
-            _timerText = timeText; //.substring(0, 8)
+            _timerText = timeText.substring(0, 8);
           });
         }, onError: (err) {
           print(err);
@@ -239,12 +254,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
         // _recorderSubscription.cancel();
       }
+      getRecorderState();
     }
   }
 
   Future<void> stopRecording() async {
     if (myRecorder != null) {
       await myRecorder!.stopRecorder();
+      getRecorderState();
     }
   }
 
