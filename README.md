@@ -1,7 +1,10 @@
 # recorder
 
 - 進度:
-  - recorder without timing: 可錄音與播放，但是上方秒數無法正常計時。 
+  - recorder without timing: 可錄音與播放，但是上方秒數無法正常計時。
+
+    <img src="https://hackmd.io/_uploads/ByPbs1CA3.png" width="100px">
+
 
 ## Getting Started
 
