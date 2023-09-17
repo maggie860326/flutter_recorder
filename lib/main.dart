@@ -38,11 +38,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final FlutterSoundRecorder _recordingSession = FlutterSoundRecorder();
+  // FlutterSoundPlayer? myPlayer = FlutterSoundPlayer();
+  FlutterSoundRecorder? myRecorder = FlutterSoundRecorder();
+  StreamSubscription? _recorderSubscription;
   final recordingPlayer = AssetsAudioPlayer();
   String pathToAudio = "";
   bool _playAudio = false;
   bool _isRecording = false;
+
   String _timerText = '00:00:00';
 
   @override
@@ -54,17 +57,31 @@ class _MyHomePageState extends State<MyHomePage> {
   void initializer() async {
     pathToAudio = '/sdcard/Download/temp.wav';
     // _recordingSession = FlutterSoundRecorder();
-    await _recordingSession.openAudioSession(
-        focus: AudioFocus.requestFocusAndStopOthers,
-        category: SessionCategory.playAndRecord,
-        mode: SessionMode.modeDefault,
-        device: AudioDevice.speaker);
-    await _recordingSession
+    myRecorder = await FlutterSoundRecorder().openRecorder();
+    await myRecorder!
         .setSubscriptionDuration(const Duration(milliseconds: 100));
     await initializeDateFormatting();
     await Permission.microphone.request();
     await Permission.storage.request();
     await Permission.manageExternalStorage.request();
+  }
+
+  @override
+  void dispose() {
+    stopRecording;
+
+    if (_recorderSubscription != null) {
+      _recorderSubscription!.cancel();
+      _recorderSubscription = null;
+    }
+    if (myRecorder != null) {
+      myRecorder!.closeRecorder();
+      myRecorder = null;
+    }
+    // if (myPlayer != null) {
+    //   myPlayer = null;
+    // }
+    super.dispose();
   }
 
   @override
@@ -78,6 +95,15 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             const SizedBox(
               height: 40,
+            ),
+            Center(
+              child: Text(
+                getRecorderState(),
+                style: const TextStyle(fontSize: 70, color: Colors.white),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
             ),
             Center(
               child: Text(
@@ -105,28 +131,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   : const Icon(Icons.mic),
               label: const Text(''),
             ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: <Widget>[
-            //     createElevatedButton(
-            //       icon: Icons.mic,
-            //       iconColor: Colors.red,
-            //       onPressFunc: startRecording,
-            //     ),
-            //     const SizedBox(
-            //       width: 30,
-            //     ),
-            //     createElevatedButton(
-            //       icon: Icons.stop,
-            //       iconColor: Colors.red,
-            //       onPressFunc: stopRecording,
-            //     ),
-            //   ],
-            // ),
             const SizedBox(
               height: 20,
             ),
-
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                   elevation: 9.0, backgroundColor: Colors.red),
@@ -189,42 +196,56 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  String getRecorderState() {
+    if (myRecorder!.isStopped) {
+      return "Stopped";
+    } else if (myRecorder!.isRecording) {
+      return "Recording";
+    } else if (myRecorder!.isPaused) {
+      return "Paused";
+    } else {
+      return "Unknown";
+    }
+  }
+
   Future<void> startRecording() async {
     Directory directory = Directory(path.dirname(pathToAudio));
     if (!directory.existsSync()) {
       directory.createSync();
     }
-    _recordingSession.openAudioSession();
-    await _recordingSession.startRecorder(
-      toFile: pathToAudio,
-      codec: Codec.pcm16WAV,
-    );
+    if (myRecorder != null) {
+      // myRecorder!.openAudioSession();
+      await myRecorder!.startRecorder(
+        toFile: pathToAudio,
+        codec: Codec.pcm16WAV,
+        sampleRate: 16000,
+      );
 
-    if (_recordingSession.onProgress != null) {
-      // ignore: no_leading_underscores_for_local_identifiers
-      StreamSubscription _recorderSubscription =
-          _recordingSession.onProgress!.listen((e) {
-        var date = DateTime.fromMillisecondsSinceEpoch(
-            e.duration.inMilliseconds,
-            isUtc: true);
-        var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
-        setState(() {
-          _timerText = timeText; //.substring(0, 8)
-        });
-      }, onError: (err) {
-        print(err);
-      }, onDone: () {
-        print('subscription done!!');
-      }, cancelOnError: false);
+      if (myRecorder!.onProgress != null) {
+        // ignore: no_leading_underscores_for_local_identifiers
+        _recorderSubscription = myRecorder!.onProgress!.listen((e) {
+          var date = DateTime.fromMillisecondsSinceEpoch(
+              e.duration.inMilliseconds,
+              isUtc: true);
+          var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
+          setState(() {
+            _timerText = timeText; //.substring(0, 8)
+          });
+        }, onError: (err) {
+          print(err);
+        }, onDone: () {
+          print('subscription done!!');
+        }, cancelOnError: false);
 
-      _recorderSubscription.cancel();
-      print(_timerText);
+        // _recorderSubscription.cancel();
+      }
     }
   }
 
-  Future<String?> stopRecording() async {
-    _recordingSession.closeAudioSession();
-    return await _recordingSession.stopRecorder();
+  Future<void> stopRecording() async {
+    if (myRecorder != null) {
+      await myRecorder!.stopRecorder();
+    }
   }
 
   Future<void> playFunc() async {
