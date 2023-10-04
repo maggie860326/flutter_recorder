@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'RecorderPage.dart';
+import 'SwipeTest.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,10 +24,9 @@ class MyApp extends StatelessWidget {
           ),
           body: _FirstPage(),
         ),
+        //todo: 註冊頁面
         routes: <String, WidgetBuilder>{
-          '/RecorderPage': (_) => const RecorderPage(
-                title: "錄音頁面",
-              )
+          '/SwipeTest': (_) =>  SwipeTest(),
         });
   }
 }
@@ -48,7 +47,7 @@ class _FirstPage extends StatelessWidget {
                   splashColor: Colors.blue.withAlpha(30),
                   onTap: () {
                     debugPrint('Card tapped.');
-                    Navigator.pushNamed(context, "/RecorderPage");
+                    Navigator.pushNamed(context, "/SwipeTest");
                   },
                   child: const SizedBox(
                     width: 300,
@@ -63,7 +62,7 @@ class _FirstPage extends StatelessWidget {
                   splashColor: Colors.blue.withAlpha(30),
                   onTap: () {
                     debugPrint('Card tapped.');
-                    Navigator.pushNamed(context, "/RecorderPage");
+                    Navigator.pushNamed(context, "/SwipeTest");
                   },
                   child: const SizedBox(
                     width: 300,

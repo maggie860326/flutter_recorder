@@ -23,7 +23,7 @@ class _RecorderPageState extends State<RecorderPage> {
   FlutterSoundRecorder? myRecorder = FlutterSoundRecorder();
   StreamSubscription? _recorderSubscription;
   final recordingPlayer = AssetsAudioPlayer();
-  String _recorderState = "Stopped";
+  String _recorderState = "錄音已停止";
   String pathToAudio = "";
   bool _playAudio = false;
   bool _isRecording = false;
@@ -72,19 +72,27 @@ class _RecorderPageState extends State<RecorderPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: Colors.black87,
-      appBar: AppBar(title: const Text('錄音頁面')),
+      // appBar: AppBar(title: const Text('錄音頁面')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            const SizedBox(
-              height: 40,
-            ),
-            Center(
-              child: Text(
-                _recorderState,
-                style: const TextStyle(fontSize: 40, color: Colors.black),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue, width: 0.5),
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
+                ),
+                child: const Text(
+                  "請您跟我聊聊您的家鄉，\n您的家鄉在哪呢？您到目前為止在您的家鄉住的時間久嗎？有什麼回憶嗎？",
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
               ),
+            ),
+            Text(
+              _recorderState,
+              style: const TextStyle(fontSize: 40, color: Colors.black),
             ),
             const SizedBox(
               height: 20,
@@ -146,7 +154,7 @@ class _RecorderPageState extends State<RecorderPage> {
                       ),
                     )
                   : const Text(
-                      "Play",
+                      "播放錄音檔",
                       style: TextStyle(
                         fontSize: 28,
                       ),
@@ -188,15 +196,15 @@ class _RecorderPageState extends State<RecorderPage> {
   void getRecorderState() {
     if (myRecorder!.isStopped) {
       setState(() {
-        _recorderState = "Stopped";
+        _recorderState = "錄音已停止";
       });
     } else if (myRecorder!.isRecording) {
       setState(() {
-        _recorderState = "Recording";
+        _recorderState = "正在錄音中";
       });
     } else if (myRecorder!.isPaused) {
       setState(() {
-        _recorderState = "Paused";
+        _recorderState = "錄音已暫停";
       });
     } else {
       setState(() {
