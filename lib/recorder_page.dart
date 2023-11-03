@@ -7,13 +7,13 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import "package:whisper_flutter/whisper_flutter.dart";
-// import "package:whisper_dart/whisper_dart.dart";
 // import 'package:whisper_flutter/whisper_dart-0.0.11/lib/whisper_dart.dart';
 import "package:cool_alert/cool_alert.dart";
-// import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class RecorderPage extends StatefulWidget {
   const RecorderPage({Key? key, required this.index}) : super(key: key);
@@ -36,9 +36,9 @@ class _RecorderPageState extends State<RecorderPage>
   bool _playAudio = false;
   bool _isRecording = false;
   // Whisper
-  String audio = "";
+  String appDocPath = "";
   bool is_procces = false;
-  String model = "";
+  String pathToModel = "";
   String result = "";
 
   String _timerText = '00:00:00';
@@ -65,10 +65,11 @@ class _RecorderPageState extends State<RecorderPage>
     await Permission.storage.request();
     await Permission.audio.request();
     await Permission.manageExternalStorage.request();
-    pathToAudio = '/sdcard/Download/test1_question$index.wav';
-    audio = pathToAudio;
-    model = '/sdcard/Download/ggml-small.bin';
-    // _recordingSession = FlutterSoundRecorder();
+    appDocPath = await _appDocPath;
+    print("App Document Path is: $appDocPath");
+    pathToAudio = "$appDocPath/recording/test1_question$index.wav";
+    pathToModel = await _getFilePathFromAssets("ggml/ggml-tiny.bin");
+    // pathToModel = '/sdcard/Download/ggml-small.bin';
     myRecorder = await FlutterSoundRecorder().openRecorder();
     await myRecorder!
         .setSubscriptionDuration(const Duration(milliseconds: 100));
@@ -217,7 +218,7 @@ class _RecorderPageState extends State<RecorderPage>
                   text: "Tolong tunggu procces tadi sampai selesai ya",
                 );
               }
-              if (audio.isEmpty) {
+              if (pathToAudio.isEmpty) {
                 await CoolAlert.show(
                   context: context,
                   type: CoolAlertType.info,
@@ -228,7 +229,7 @@ class _RecorderPageState extends State<RecorderPage>
 
                 return;
               }
-              if (model.isEmpty) {
+              if (pathToModel.isEmpty) {
                 await CoolAlert.show(
                     context: context,
                     type: CoolAlertType.info,
@@ -247,13 +248,15 @@ class _RecorderPageState extends State<RecorderPage>
                 );
                 var res = await whisper.request(
                   whisperRequest: WhisperRequest.fromWavFile(
-                      audio: File(audio), model: File(model), language: "zh"),
+                      audio: File(pathToAudio),
+                      model: File(pathToModel),
+                      language: "zh"),
                 );
                 setState(() {
                   result = res.toString();
-                  is_procces = false;
                 });
               });
+              is_procces = false;
               setState(() {
                 is_procces = true;
               });
@@ -262,7 +265,7 @@ class _RecorderPageState extends State<RecorderPage>
           ),
           Padding(
             padding: const EdgeInsets.all(10),
-            child: Text("Result: ${result}"),
+            child: Text("Result: $result"),
           ),
         ],
       ),
@@ -294,6 +297,35 @@ class _RecorderPageState extends State<RecorderPage>
       ),
       label: const Text(''),
     );
+  }
+
+  //取得 app 專屬資料夾路徑
+  Future<String> get _appDocPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    print(directory.path);
+    return directory.path;
+  }
+
+  //將 asset 中檔案複製到 app 專屬資料夾，並取得其在 app 專屬資料夾中的路徑
+  Future<String> _getFilePathFromAssets(String path) async {
+    var filePath = "$appDocPath/$path";
+    var file = File(filePath);
+    //先確認 file 有沒有在 app 專屬資料夾中
+    if (file.existsSync()) {
+      print("$filePath 已存在");
+      return filePath;
+    } else {//如果 file 不在 app 專屬資料夾中，則將 file 從 assets 複製到 app 專屬資料夾
+      print("$filePath 不存在");
+      final byteData = await rootBundle.load('assets/$path');
+      print("已由 assets/$path 抓取檔案");
+      final buffer = byteData.buffer;
+      await file.create(recursive: true);
+
+      file.writeAsBytes(
+          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+      print("已由 assets/$path 將檔案寫入 $filePath");
+      return filePath;
+    }
   }
 
   void getRecorderState() {

@@ -542,7 +542,7 @@ packages:
     source: hosted
     version: "0.1.4-beta"
   whisper_dart:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: whisper_dart
       sha256: "025146bea63b02d92ffaf92537d638d97e5ca13d17b75b4b9c088d46e6528f90"
