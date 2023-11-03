@@ -1,0 +1,5 @@
+D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/x86_64/CMakeFiles/recorder.dir
+D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/x86_64/CMakeFiles/rebuild_cache.dir
+D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/x86_64/CMakeFiles/whisper.dir
+D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/x86_64/CMakeFiles/ggml.dir
+D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/x86_64/CMakeFiles/edit_cache.dir

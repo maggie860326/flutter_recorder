@@ -1,0 +1,17 @@
+[
+{
+  "directory": "D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/arm64-v8a",
+  "command": "C:\\Users\\Maggie\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android21 --sysroot=C:/Users/Maggie/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DDART_SHARED_LIB -Drecorder_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fPIC -fno-limit-debug-info  -fPIC -std=gnu++20 -o CMakeFiles\\recorder.dir\\main.cpp.o -c D:\\git_workspace\\Flutter\\whisper_app\\recorder\\src\\main.cpp",
+  "file": "D:\\git_workspace\\Flutter\\whisper_app\\recorder\\src\\main.cpp"
+},
+{
+  "directory": "D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/arm64-v8a",
+  "command": "C:\\Users\\Maggie\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android21 --sysroot=C:/Users/Maggie/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fPIC -fno-limit-debug-info  -fPIC -std=gnu++20 -o CMakeFiles\\whisper.dir\\whisper.cpp\\whisper.cpp.o -c D:\\git_workspace\\Flutter\\whisper_app\\recorder\\src\\whisper.cpp\\whisper.cpp",
+  "file": "D:\\git_workspace\\Flutter\\whisper_app\\recorder\\src\\whisper.cpp\\whisper.cpp"
+},
+{
+  "directory": "D:/git_workspace/Flutter/whisper_app/recorder/android/app/.cxx/Debug/2e2p3r5u/arm64-v8a",
+  "command": "C:\\Users\\Maggie\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe --target=aarch64-none-linux-android21 --sysroot=C:/Users/Maggie/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -fPIC -fno-limit-debug-info  -fPIC -o CMakeFiles\\ggml.dir\\whisper.cpp\\ggml.c.o -c D:\\git_workspace\\Flutter\\whisper_app\\recorder\\src\\whisper.cpp\\ggml.c",
+  "file": "D:\\git_workspace\\Flutter\\whisper_app\\recorder\\src\\whisper.cpp\\ggml.c"
+}
+]

@@ -9,6 +9,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import "package:whisper_flutter/whisper_flutter.dart";
+// import "package:whisper_dart/whisper_dart.dart";
+// import 'package:whisper_flutter/whisper_dart-0.0.11/lib/whisper_dart.dart';
+import "package:cool_alert/cool_alert.dart";
 // import 'package:path_provider/path_provider.dart';
 
 class RecorderPage extends StatefulWidget {
@@ -31,6 +35,11 @@ class _RecorderPageState extends State<RecorderPage>
   String pathToAudio = "";
   bool _playAudio = false;
   bool _isRecording = false;
+  // Whisper
+  String audio = "";
+  bool is_procces = false;
+  String model = "";
+  String result = "";
 
   String _timerText = '00:00:00';
   List<String> questions = [
@@ -57,6 +66,8 @@ class _RecorderPageState extends State<RecorderPage>
     await Permission.audio.request();
     await Permission.manageExternalStorage.request();
     pathToAudio = '/sdcard/Download/test1_question$index.wav';
+    audio = pathToAudio;
+    model = '/sdcard/Download/ggml-small.bin';
     // _recordingSession = FlutterSoundRecorder();
     myRecorder = await FlutterSoundRecorder().openRecorder();
     await myRecorder!
@@ -100,11 +111,13 @@ class _RecorderPageState extends State<RecorderPage>
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          SizedBox(height: 20,),
+          SizedBox(
+            height: 20,
+          ),
           Container(
             // height: 50,
             child: Text(
-              "問題 ${index+1}",
+              "問題 ${index + 1}",
               style: TextStyle(fontSize: 20, color: Colors.black),
             ),
           ),
@@ -192,6 +205,65 @@ class _RecorderPageState extends State<RecorderPage>
                     ),
                   ),
           ),
+          const SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (is_procces) {
+                return await CoolAlert.show(
+                  context: context,
+                  type: CoolAlertType.info,
+                  text: "Tolong tunggu procces tadi sampai selesai ya",
+                );
+              }
+              if (audio.isEmpty) {
+                await CoolAlert.show(
+                  context: context,
+                  type: CoolAlertType.info,
+                  text: "Maaf audio kosong tolong setting dahulu ya",
+                );
+
+                print("audio is empty");
+
+                return;
+              }
+              if (model.isEmpty) {
+                await CoolAlert.show(
+                    context: context,
+                    type: CoolAlertType.info,
+                    text: "Maaf model kosong tolong setting dahulu ya");
+
+                print("model is empty");
+
+                return;
+              }
+
+              Future(() async {
+                print("Started transcribe");
+
+                Whisper whisper = Whisper(
+                  whisperLib: "libwhisper.so",
+                );
+                var res = await whisper.request(
+                  whisperRequest: WhisperRequest.fromWavFile(
+                      audio: File(audio), model: File(model), language: "zh"),
+                );
+                setState(() {
+                  result = res.toString();
+                  is_procces = false;
+                });
+              });
+              setState(() {
+                is_procces = true;
+              });
+            },
+            child: const Text("Start"),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text("Result: ${result}"),
+          ),
         ],
       ),
     );
@@ -254,7 +326,7 @@ class _RecorderPageState extends State<RecorderPage>
       await myRecorder!.startRecorder(
         toFile: pathToAudio,
         codec: Codec.pcm16WAV,
-        // sampleRate: 16000,
+        sampleRate: 16000,
       );
 
       if (myRecorder!.onProgress != null) {

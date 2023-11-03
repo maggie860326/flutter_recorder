@@ -41,6 +41,9 @@ dependencies:
   intl: ^0.18.1
   path: ^1.8.3
   path_provider: ^2.1.1
+  whisper_flutter: ^0.0.5
+  cool_alert: ^2.0.1
+  whisper_dart: ^0.0.11
 
 dev_dependencies:
   flutter_test:
