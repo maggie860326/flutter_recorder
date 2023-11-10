@@ -11,9 +11,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import "package:whisper_flutter/whisper_flutter.dart";
-// import 'package:whisper_flutter/whisper_dart-0.0.11/lib/whisper_dart.dart';
 import "package:cool_alert/cool_alert.dart";
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:isolate';
 
 class RecorderPage extends StatefulWidget {
   const RecorderPage({Key? key, required this.index}) : super(key: key);
@@ -215,14 +215,14 @@ class _RecorderPageState extends State<RecorderPage>
                 return await CoolAlert.show(
                   context: context,
                   type: CoolAlertType.info,
-                  text: "Tolong tunggu procces tadi sampai selesai ya",
+                  text: "Whisper 正在轉錄中",
                 );
               }
               if (pathToAudio.isEmpty) {
                 await CoolAlert.show(
                   context: context,
                   type: CoolAlertType.info,
-                  text: "Maaf audio kosong tolong setting dahulu ya",
+                  text: "找不到此音檔",
                 );
 
                 print("audio is empty");
@@ -233,7 +233,7 @@ class _RecorderPageState extends State<RecorderPage>
                 await CoolAlert.show(
                     context: context,
                     type: CoolAlertType.info,
-                    text: "Maaf model kosong tolong setting dahulu ya");
+                    text: "找不到此 model");
 
                 print("model is empty");
 
@@ -241,8 +241,9 @@ class _RecorderPageState extends State<RecorderPage>
               }
 
               Future(() async {
-                print("Started transcribe");
-
+                print("Start transcribe");
+                is_procces = true;
+                DateTime startTimestamp = DateTime.now();
                 Whisper whisper = Whisper(
                   whisperLib: "libwhisper.so",
                 );
@@ -252,13 +253,17 @@ class _RecorderPageState extends State<RecorderPage>
                       model: File(pathToModel),
                       language: "zh"),
                 );
+
                 setState(() {
                   result = res.toString();
                 });
-              });
-              is_procces = false;
-              setState(() {
-                is_procces = true;
+
+                DateTime endTimestamp = DateTime.now();
+                Duration timeElapsed = endTimestamp.difference(startTimestamp);
+                print(
+                    "Time elapsed:  ${timeElapsed.inMilliseconds} milliseconds");
+                print(result);
+                is_procces = false;
               });
             },
             child: const Text("Start"),
@@ -271,6 +276,8 @@ class _RecorderPageState extends State<RecorderPage>
       ),
     );
   }
+
+  void isolateWhisper(pathToAudio, pathToModel) {}
 
   ElevatedButton createElevatedButton(
       {required IconData icon,
@@ -314,7 +321,8 @@ class _RecorderPageState extends State<RecorderPage>
     if (file.existsSync()) {
       print("$filePath 已存在");
       return filePath;
-    } else {//如果 file 不在 app 專屬資料夾中，則將 file 從 assets 複製到 app 專屬資料夾
+    } else {
+      //如果 file 不在 app 專屬資料夾中，則將 file 從 assets 複製到 app 專屬資料夾
       print("$filePath 不存在");
       final byteData = await rootBundle.load('assets/$path');
       print("已由 assets/$path 抓取檔案");
