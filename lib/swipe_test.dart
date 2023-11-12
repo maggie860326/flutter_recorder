@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'recorder_page.dart';
 import 'test_instruction_page.dart';
+import 'package:provider/provider.dart';
 
 class SwipeTest extends StatefulWidget {
   final int initialPage;
@@ -59,7 +60,8 @@ class _SwipeTestState extends State<SwipeTest> {
         ]),
         body: PageView.builder(
           itemBuilder: (context, index) {
-            return pages[index];
+            return ChangeNotifierProvider.value(
+                value: controller, child: pages[index]);
           },
           controller: controller,
           itemCount: pages.length,

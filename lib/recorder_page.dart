@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -13,7 +14,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import "package:whisper_flutter/whisper_flutter.dart";
 import "package:cool_alert/cool_alert.dart";
 import 'package:flutter/services.dart' show rootBundle;
-import 'dart:isolate';
+import 'package:provider/provider.dart';
 
 class RecorderPage extends StatefulWidget {
   const RecorderPage({Key? key, required this.index}) : super(key: key);
@@ -25,8 +26,9 @@ class RecorderPage extends StatefulWidget {
 class _RecorderPageState extends State<RecorderPage>
 // with AutomaticKeepAliveClientMixin
 {
-  final int index;
+  int index;
   _RecorderPageState({required this.index});
+  PageController controller = PageController();
   // FlutterSoundPlayer? myPlayer = FlutterSoundPlayer();
   FlutterSoundRecorder? myRecorder = FlutterSoundRecorder();
   StreamSubscription? _recorderSubscription;
@@ -37,9 +39,9 @@ class _RecorderPageState extends State<RecorderPage>
   bool _isRecording = false;
   // Whisper
   String appDocPath = "";
-  bool is_procces = false;
+  // bool is_procces = false;
   String pathToModel = "";
-  String result = "";
+  // String result = "";
 
   String _timerText = '00:00:00';
   List<String> questions = [
@@ -65,11 +67,14 @@ class _RecorderPageState extends State<RecorderPage>
     await Permission.storage.request();
     await Permission.audio.request();
     await Permission.manageExternalStorage.request();
+
     appDocPath = await _appDocPath;
+
     print("App Document Path is: $appDocPath");
-    pathToAudio = "$appDocPath/recording/test1_question$index.wav";
+    pathToAudio = "$appDocPath/test1/recording/question$index.wav";
     pathToModel = await _getFilePathFromAssets("ggml/ggml-tiny.bin");
     // pathToModel = '/sdcard/Download/ggml-small.bin';
+    // pathToText = "$appDocPath/text/test1_question$index.txt";
     myRecorder = await FlutterSoundRecorder().openRecorder();
     await myRecorder!
         .setSubscriptionDuration(const Duration(milliseconds: 100));
@@ -107,6 +112,7 @@ class _RecorderPageState extends State<RecorderPage>
 
   @override
   Widget build(BuildContext context) {
+    controller = Provider.of<PageController>(context);
     print("第 $index 頁 build");
     return Scaffold(
       body: Column(
@@ -194,7 +200,7 @@ class _RecorderPageState extends State<RecorderPage>
                 : const Icon(Icons.play_arrow),
             label: _playAudio
                 ? const Text(
-                    "Stop",
+                    "停止播放",
                     style: TextStyle(
                       fontSize: 28,
                     ),
@@ -210,74 +216,66 @@ class _RecorderPageState extends State<RecorderPage>
             height: 20,
           ),
           ElevatedButton(
-            onPressed: () async {
-              if (is_procces) {
-                return await CoolAlert.show(
-                  context: context,
-                  type: CoolAlertType.info,
-                  text: "Whisper 正在轉錄中",
-                );
-              }
-              if (pathToAudio.isEmpty) {
-                await CoolAlert.show(
-                  context: context,
-                  type: CoolAlertType.info,
-                  text: "找不到此音檔",
-                );
-
-                print("audio is empty");
-
-                return;
-              }
-              if (pathToModel.isEmpty) {
-                await CoolAlert.show(
-                    context: context,
-                    type: CoolAlertType.info,
-                    text: "找不到此 model");
-
-                print("model is empty");
-
-                return;
-              }
-
-              Future(() async {
-                print("Start transcribe");
-                is_procces = true;
-                DateTime startTimestamp = DateTime.now();
-                Whisper whisper = Whisper(
-                  whisperLib: "libwhisper.so",
-                );
-                var res = await whisper.request(
-                  whisperRequest: WhisperRequest.fromWavFile(
-                      audio: File(pathToAudio),
-                      model: File(pathToModel),
-                      language: "zh"),
-                );
-
-                setState(() {
-                  result = res.toString();
-                });
-
-                DateTime endTimestamp = DateTime.now();
-                Duration timeElapsed = endTimestamp.difference(startTimestamp);
-                print(
-                    "Time elapsed:  ${timeElapsed.inMilliseconds} milliseconds");
-                print(result);
-                is_procces = false;
-              });
+            onPressed: () {
+              runWhisper();
+              controller.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut);
             },
-            child: const Text("Start"),
+            child: const Text(
+              "下一題",
+              style: TextStyle(
+                fontSize: 28,
+              ),
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text("Result: $result"),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(10),
+          //   child: Text("Result: $result"),
+          // ),
         ],
       ),
     );
   }
 
-  void isolateWhisper(pathToAudio, pathToModel) {}
+  Future<void> runWhisper() async {
+    //檢查 audio、model 路徑是否正確
+    if (pathToAudio.isEmpty) {
+      await CoolAlert.show(
+        context: context,
+        type: CoolAlertType.info,
+        text: "找不到此音檔",
+      );
+
+      print("audio is empty");
+
+      return;
+    }
+    if (pathToModel.isEmpty) {
+      await CoolAlert.show(
+          context: context, type: CoolAlertType.info, text: "找不到此 model");
+
+      print("model is empty");
+
+      return;
+    }
+
+    // Whisper
+    print("Start transcribe");
+    DateTime startTimestamp = DateTime.now();
+    Whisper whisper = Whisper(
+      whisperLib: "libwhisper.so",
+    );
+    var res = await whisper.request(
+      whisperRequest: WhisperRequest.fromWavFile(
+          audio: File(pathToAudio), model: File(pathToModel), language: "zh"),
+    );
+
+    DateTime endTimestamp = DateTime.now();
+    Duration timeElapsed = endTimestamp.difference(startTimestamp);
+    print("Time elapsed:  ${timeElapsed.inMilliseconds} milliseconds");
+    print(res.toString());
+  }
 
   ElevatedButton createElevatedButton(
       {required IconData icon,
@@ -359,7 +357,7 @@ class _RecorderPageState extends State<RecorderPage>
   Future<void> startRecording() async {
     Directory directory = Directory(path.dirname(pathToAudio));
     if (!directory.existsSync()) {
-      directory.createSync();
+      directory.createSync(recursive: true);
     }
     if (myRecorder != null) {
       // myRecorder!.openAudioSession();
