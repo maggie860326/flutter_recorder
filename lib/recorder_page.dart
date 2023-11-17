@@ -2,7 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -15,33 +15,48 @@ import "package:whisper_flutter/whisper_flutter.dart";
 import "package:cool_alert/cool_alert.dart";
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
+import 'function.dart';
 
 class RecorderPage extends StatefulWidget {
-  const RecorderPage({Key? key, required this.index}) : super(key: key);
+  const RecorderPage(
+      {Key? key,
+      required this.index,
+      required this.hostUrl,
+      required this.wavUrl})
+      : super(key: key);
   final int index;
+  final String hostUrl;
+  final String wavUrl;
   @override
-  State<RecorderPage> createState() => _RecorderPageState(index: index);
+  State<RecorderPage> createState() =>
+      _RecorderPageState(index: index, hostUrl: hostUrl, wavUrl: wavUrl);
 }
 
 class _RecorderPageState extends State<RecorderPage>
 // with AutomaticKeepAliveClientMixin
 {
   int index;
-  _RecorderPageState({required this.index});
-  PageController controller = PageController();
-  // FlutterSoundPlayer? myPlayer = FlutterSoundPlayer();
+  final String hostUrl;
+  final String wavUrl;
+  _RecorderPageState(
+      {required this.index, required this.hostUrl, required this.wavUrl});
+
+  //看 whisper 完成了沒
+  Completer completer = Completer();
+
+
+  //各種路徑
+  String appDocPath = "";
+  String pathToAudio = "";
+  String pathToText = "";
+  String pathToModel = "";
+  //recorder 相關變數
   FlutterSoundRecorder? myRecorder = FlutterSoundRecorder();
   StreamSubscription? _recorderSubscription;
   final recordingPlayer = AssetsAudioPlayer();
   String _recorderState = "準備好後請按下按鈕";
-  String pathToAudio = "";
   bool _playAudio = false;
   bool _isRecording = false;
-  // Whisper
-  String appDocPath = "";
-  // bool is_procces = false;
-  String pathToModel = "";
-  // String result = "";
 
   String _timerText = '00:00:00';
   List<String> questions = [
@@ -52,29 +67,28 @@ class _RecorderPageState extends State<RecorderPage>
     "請您跟我聊聊您最近喜歡看的節目是什麼？ 從電視、Youtube或廣播",
     "一年中的四季，您最喜歡哪一個季節？為什麼？",
   ];
-  // @override
-  // bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     initializer();
-    print("第 $index 頁 initialized.\n");
+    print("m: 第 $index 頁 initialized.\n");
   }
 
   void initializer() async {
-    await Permission.microphone.request();
-    await Permission.storage.request();
-    await Permission.audio.request();
-    await Permission.manageExternalStorage.request();
+    //要求權限
+    await requestPermission(Permission.microphone);
 
+    //取得路徑
     appDocPath = await _appDocPath;
-
-    print("App Document Path is: $appDocPath");
+    print("m: App Document Path is: $appDocPath");
     pathToAudio = "$appDocPath/test1/recording/question$index.wav";
+    pathToText = "$appDocPath/test1/text/question$index.txt";
     pathToModel = await _getFilePathFromAssets("ggml/ggml-tiny.bin");
     // pathToModel = '/sdcard/Download/ggml-small.bin';
     // pathToText = "$appDocPath/text/test1_question$index.txt";
+
+    //recorder相關設定
     myRecorder = await FlutterSoundRecorder().openRecorder();
     await myRecorder!
         .setSubscriptionDuration(const Duration(milliseconds: 100));
@@ -94,43 +108,31 @@ class _RecorderPageState extends State<RecorderPage>
       myRecorder!.closeRecorder();
       myRecorder = null;
     }
-    print("第 $index 頁 disposed.\n");
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    print("第 $index 頁 didChangeDependencies");
-  }
-
-  @override
-  void didUpdateWidget(covariant RecorderPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    print("第 $index 頁 didUpdateWidget");
+    print("m: 第 $index 頁 disposed.\n");
   }
 
   @override
   Widget build(BuildContext context) {
-    controller = Provider.of<PageController>(context);
-    print("第 $index 頁 build");
+    print("m: 第 $index 頁 build");
+    // bool isWhisperComplete = Provider.of<bool>(context, listen: true);
+
+    // print("m: whisper 完成了沒: ${completer.isCompleted}");
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
-          Container(
-            // height: 50,
-            child: Text(
-              "問題 ${index + 1}",
-              style: TextStyle(fontSize: 20, color: Colors.black),
-            ),
+          // height: 50,
+          Text(
+            "問題 ${index + 1}",
+            style: const TextStyle(fontSize: 20, color: Colors.black),
           ),
+
           Container(
-            padding: EdgeInsets.all(10),
-            margin: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.all(20),
             height: 150,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.blue, width: 0.5),
@@ -162,12 +164,17 @@ class _RecorderPageState extends State<RecorderPage>
             heroTag: "btn $index",
             backgroundColor: Colors.red,
             onPressed: () {
-              setState(() {
-                _isRecording = !_isRecording;
-              });
-              if (_isRecording) {
+              if (!_isRecording) {
+                setState(() {
+                  _recorderState = "現在請說話";
+                  _isRecording = !_isRecording;
+                });
                 startRecording();
               } else {
+                setState(() {
+                  _recorderState = "準備好後請按下按鈕";
+                  _isRecording = !_isRecording;
+                });
                 stopRecording();
               }
             },
@@ -217,8 +224,9 @@ class _RecorderPageState extends State<RecorderPage>
           ),
           ElevatedButton(
             onPressed: () {
+              submitWav();
               runWhisper();
-              controller.nextPage(
+              Provider.of<PageController>(context, listen: false).nextPage(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut);
             },
@@ -229,85 +237,32 @@ class _RecorderPageState extends State<RecorderPage>
               ),
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.all(10),
-          //   child: Text("Result: $result"),
+          // const SizedBox(
+          //   height: 20,
+          // ),
+          // ElevatedButton(
+          //   onPressed: () {
+          //     // isWhisperComplete = completer.isCompleted;
+          //     print("m: whisper 完成了沒: ${completer.isCompleted}}");
+          //   },
+          //   child: const Text(
+          //     "看 whisper 跑完了沒",
+          //     style: TextStyle(
+          //       fontSize: 28,
+          //     ),
+          //   ),
           // ),
         ],
       ),
     );
   }
 
-  Future<void> runWhisper() async {
-    //檢查 audio、model 路徑是否正確
-    if (pathToAudio.isEmpty) {
-      await CoolAlert.show(
-        context: context,
-        type: CoolAlertType.info,
-        text: "找不到此音檔",
-      );
-
-      print("audio is empty");
-
-      return;
-    }
-    if (pathToModel.isEmpty) {
-      await CoolAlert.show(
-          context: context, type: CoolAlertType.info, text: "找不到此 model");
-
-      print("model is empty");
-
-      return;
-    }
-
-    // Whisper
-    print("Start transcribe");
-    DateTime startTimestamp = DateTime.now();
-    Whisper whisper = Whisper(
-      whisperLib: "libwhisper.so",
-    );
-    var res = await whisper.request(
-      whisperRequest: WhisperRequest.fromWavFile(
-          audio: File(pathToAudio), model: File(pathToModel), language: "zh"),
-    );
-
-    DateTime endTimestamp = DateTime.now();
-    Duration timeElapsed = endTimestamp.difference(startTimestamp);
-    print("Time elapsed:  ${timeElapsed.inMilliseconds} milliseconds");
-    print(res.toString());
-  }
-
-  ElevatedButton createElevatedButton(
-      {required IconData icon,
-      required Color iconColor,
-      required void Function() onPressFunc}) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.all(6.0),
-        side: const BorderSide(
-          color: Colors.red,
-          width: 4.0,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 9.0,
-      ),
-      onPressed: onPressFunc,
-      icon: Icon(
-        icon,
-        color: iconColor,
-        size: 38.0,
-      ),
-      label: const Text(''),
-    );
-  }
+  /* ==============以下是 function============== */
 
   //取得 app 專屬資料夾路徑
   Future<String> get _appDocPath async {
     final directory = await getApplicationDocumentsDirectory();
-    print(directory.path);
+    // print(directory.path);
     return directory.path;
   }
 
@@ -317,42 +272,115 @@ class _RecorderPageState extends State<RecorderPage>
     var file = File(filePath);
     //先確認 file 有沒有在 app 專屬資料夾中
     if (file.existsSync()) {
-      print("$filePath 已存在");
+      print("m: $filePath 已存在");
       return filePath;
     } else {
       //如果 file 不在 app 專屬資料夾中，則將 file 從 assets 複製到 app 專屬資料夾
-      print("$filePath 不存在");
+      print("m: $filePath 不存在");
       final byteData = await rootBundle.load('assets/$path');
-      print("已由 assets/$path 抓取檔案");
+      print("m: 已由 assets/$path 抓取檔案");
       final buffer = byteData.buffer;
       await file.create(recursive: true);
 
       file.writeAsBytes(
           buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-      print("已由 assets/$path 將檔案寫入 $filePath");
+      print("m: 已由 assets/$path 將檔案寫入 $filePath");
       return filePath;
     }
   }
 
-  void getRecorderState() {
-    if (myRecorder!.isStopped) {
-      setState(() {
-        _recorderState = "準備好後請按下按鈕";
-      });
-    } else if (myRecorder!.isRecording) {
-      setState(() {
-        _recorderState = "現在請說話";
-      });
-    } else if (myRecorder!.isPaused) {
-      setState(() {
-        _recorderState = "錄音已暫停";
-      });
+  Future<void> submitWav() async {
+    File wavFile = File(pathToAudio);
+    if (wavFile.existsSync()) {
+      String result = await sendWavFileToServer(wavUrl, wavFile);
+      print("m: 傳送wav到後端結果: $result");
     } else {
-      setState(() {
-        _recorderState = "Unknown";
-      });
+      print("m: wav 檔不存在");
     }
   }
+
+  //執行Whisper
+  Future<void> runWhisper() async {
+    //檢查 audio、model 路徑是否正確
+    if (pathToAudio.isEmpty) {
+      await CoolAlert.show(
+        context: context,
+        type: CoolAlertType.info,
+        text: "找不到此音檔",
+      );
+
+      print("m: audio is empty");
+      return;
+    }
+    if (pathToModel.isEmpty) {
+      await CoolAlert.show(
+          context: context, type: CoolAlertType.info, text: "找不到此 model");
+
+      print("m: model is empty");
+      return;
+    }
+
+    // Whisper
+    print("m: Start transcribe");
+    DateTime startTimestamp = DateTime.now();
+    Whisper whisper = Whisper(
+      whisperLib: "libwhisper.so",
+    );
+    var res = await whisper.request(
+      whisperRequest: WhisperRequest.fromWavFile(
+          audio: File(pathToAudio),
+          model: File(pathToModel),
+          is_no_timestamps: true,
+          language: "zh"),
+    );
+
+    DateTime endTimestamp = DateTime.now();
+    Duration timeElapsed = endTimestamp.difference(startTimestamp);
+    print("m: Time elapsed:  ${timeElapsed.inMilliseconds} milliseconds");
+    String? text = res.text;
+    if (text != null) {
+      await saveText(text);
+    }
+    print("m: $text");
+    completer.complete();
+    // isWhisperComplete = completer.isCompleted;
+    return;
+  }
+
+  //儲存轉錄文字
+  Future<void> saveText(String str) async {
+    Directory directory = Directory(path.dirname(pathToText));
+    try {
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+      final file = File(pathToText);
+      file.writeAsString(str);
+      print("m: 成功寫入 $pathToText");
+    } catch (e) {
+      print("m: $e");
+    }
+  }
+
+  // void getRecorderState() {
+  //   if (myRecorder!.isStopped) {
+  //     setState(() {
+  //       _recorderState = "準備好後請按下按鈕";
+  //     });
+  //   } else if (myRecorder!.isRecording) {
+  //     setState(() {
+  //       _recorderState = "現在請說話";
+  //     });
+  //   } else if (myRecorder!.isPaused) {
+  //     setState(() {
+  //       _recorderState = "錄音已暫停";
+  //     });
+  //   } else {
+  //     setState(() {
+  //       _recorderState = "Unknown";
+  //     });
+  //   }
+  // }
 
   Future<void> startRecording() async {
     Directory directory = Directory(path.dirname(pathToAudio));
@@ -383,7 +411,7 @@ class _RecorderPageState extends State<RecorderPage>
           print('subscription done!!');
         }, cancelOnError: false);
       }
-      getRecorderState();
+      // getRecorderState();
     }
   }
 
@@ -391,7 +419,7 @@ class _RecorderPageState extends State<RecorderPage>
     if (myRecorder != null) {
       await _recorderSubscription!.cancel();
       await myRecorder!.stopRecorder();
-      getRecorderState();
+      // getRecorderState();
     }
   }
 
@@ -405,5 +433,22 @@ class _RecorderPageState extends State<RecorderPage>
 
   Future<void> stopPlayFunc() async {
     recordingPlayer.stop();
+  }
+}
+
+// 请求存储权限
+Future<void> requestPermission(Permission permission) async {
+  var status = await permission.status;
+  if (status.isGranted) {
+    // 用户授予了存储权限
+    print('m: $permission granted');
+  } else if (status.isPermanentlyDenied) {
+    // 用户永久拒绝了权限
+    print('m: $permission permanently denied');
+    await openAppSettings(); // 打开应用程序设置页面，用户可以手动授予权限
+  } else {
+    // 用户拒绝了权限
+    print('m: $permission denied');
+    await permission.request();
   }
 }

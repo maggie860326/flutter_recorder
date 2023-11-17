@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'swipe_test.dart';
+import 'report_page.dart';
+import 'dart:io';
 
 void main() {
   runApp(const MyApp());
@@ -33,8 +35,12 @@ class MyApp extends StatelessWidget {
 }
 
 class _FirstPage extends StatelessWidget {
+  //後端的路由
+  final String hostUrl = 'http://10.0.2.2:5000/';
+
   @override
   Widget build(BuildContext context) {
+    print("m: 這支手機的 Processors 數量為  ${Platform.numberOfProcessors}");
     return MaterialApp(
       theme: ThemeData(
           colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
@@ -48,12 +54,12 @@ class _FirstPage extends StatelessWidget {
                 child: InkWell(
                   splashColor: Colors.blue.withAlpha(30),
                   onTap: () {
-                    debugPrint('Card tapped.');
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SwipeTest(
                             initialPage: 3,
+                            hostUrl: hostUrl,
                           ),
                         ));
                   },
@@ -70,12 +76,12 @@ class _FirstPage extends StatelessWidget {
                 child: InkWell(
                   splashColor: Colors.blue.withAlpha(30),
                   onTap: () {
-                    debugPrint('Card tapped.');
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SwipeTest(
                             initialPage: 0,
+                            hostUrl: hostUrl,
                           ),
                         ));
                   },
@@ -91,8 +97,13 @@ class _FirstPage extends StatelessWidget {
                 child: InkWell(
                   splashColor: Colors.blue.withAlpha(30),
                   onTap: () {
-                    debugPrint('Card tapped.');
-                    Navigator.pushNamed(context, "/RecorderPage");
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReportPage(
+                            hostUrl: hostUrl,
+                          ),
+                        ));
                   },
                   child: const SizedBox(
                     width: 300,
