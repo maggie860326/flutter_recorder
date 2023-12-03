@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class TestInstructionPage extends StatelessWidget {
-  const TestInstructionPage({super.key});
+  final String instruction;
+  const TestInstructionPage({super.key, required this.instruction});
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +24,10 @@ class TestInstructionPage extends StatelessWidget {
           ),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 50.0),
-            height: 100,
-            child: const Text(
-              "在接下來的測驗中，你會看到一組問題，請您看完問題後，按下錄音按鈕並開始回答。",
-              style: TextStyle(fontSize: 20, color: Colors.black),
+            height: 150,
+            child: Text(
+              instruction,
+              style: const TextStyle(fontSize: 20, color: Colors.black),
             ),
           ),
           const SizedBox(

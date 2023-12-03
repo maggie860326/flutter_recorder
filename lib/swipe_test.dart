@@ -1,12 +1,27 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, camel_case_types
 
 import 'package:flutter/material.dart';
 import 'recorder_page.dart';
+import 'recorder_image_page.dart';
 import 'test_instruction_page.dart';
 import 'test_end_page.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import "report_page.dart";
+
+class isCompleteProvider extends ChangeNotifier {
+  //檢查 whisper 完成了沒
+  var isCompleteList = [false, false, false, false, false, false];
+
+  bool isComplete(int index) => isCompleteList[index];
+
+  bool get isAllComplete => isCompleteList.every((key) => key == true);
+
+  setComplete(int index) {
+    isCompleteList[index] = true;
+    notifyListeners();
+  }
+}
 
 class SwipeTest extends StatefulWidget {
   final int initialPage;
@@ -26,14 +41,6 @@ class _SwipeTestState extends State<SwipeTest> {
   late PageController controller;
   late String wavUrl;
 
-  //檢查 whisper 完成了沒
-  // bool completer0 = false;
-  // bool completer1 = false;
-  // bool completer2 = false;
-  // bool completer3 = false;
-  // bool completer4 = false;
-  // bool completer5 = false;
-
   @override
   void dispose() {
     controller.dispose();
@@ -50,7 +57,8 @@ class _SwipeTestState extends State<SwipeTest> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      const TestInstructionPage(),
+      const TestInstructionPage(
+          instruction: "在接下來的測驗中，你會看到一組問題，請您看完問題後，按下錄音按鈕並開始回答。"),
       // Provider<bool>.value(
       //     value: completer0,
       //     builder: (context, child){return RecorderPage(index: 0, hostUrl: hostUrl, wavUrl: wavUrl);}),
@@ -60,6 +68,11 @@ class _SwipeTestState extends State<SwipeTest> {
       RecorderPage(index: 3, hostUrl: hostUrl, wavUrl: wavUrl),
       RecorderPage(index: 4, hostUrl: hostUrl, wavUrl: wavUrl),
       RecorderPage(index: 5, hostUrl: hostUrl, wavUrl: wavUrl),
+      const TestInstructionPage(
+          instruction: "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。"),
+      RecorderImagePage(index: 6, hostUrl: hostUrl, wavUrl: wavUrl),
+      RecorderImagePage(index: 7, hostUrl: hostUrl, wavUrl: wavUrl),
+      RecorderImagePage(index: 8, hostUrl: hostUrl, wavUrl: wavUrl),
       TestEndPage(hostUrl: hostUrl),
       ReportPage(hostUrl: hostUrl)
     ];

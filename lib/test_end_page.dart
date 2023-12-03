@@ -65,7 +65,7 @@ void submitText(context, String textUrl) async {
   String appDocPath = await _appDocPath;
   final Map<String, String> jsonData = {};
   try {
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 9; i++) {
       File file = await File("$appDocPath/test1/text/question$i.txt");
       if (file.existsSync()) {
         final text = await file.readAsString();

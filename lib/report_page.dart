@@ -35,7 +35,7 @@ class _ReportPageState extends State<ReportPage> {
               height: 100,
             ),
             ElevatedButton(
-              child: const Text("查看測驗報告"),
+              child: const Text("載入分析結果"),
               onPressed: () {
                 getPng(pngUrl);
               },
