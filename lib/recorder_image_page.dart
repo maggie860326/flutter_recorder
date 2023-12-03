@@ -54,10 +54,12 @@ class _RecorderPageState extends State<RecorderImagePage>
   StreamSubscription? _recorderSubscription;
   final recordingPlayer = AssetsAudioPlayer();
   String _recorderState = "準備好後請按下按鈕";
-  bool _playAudio = false;
+  // bool _playAudio = false;
   bool _isRecording = false;
+  bool _isOver1Min = true;
+  bool _nextVisible = false;
 
-  String _timerText = '00:00:00';
+  String _timerText = '';
   List<String> pathToImages = [
     "assets/image/picture1.jpg",
     "assets/image/picture2.jpg",
@@ -164,20 +166,24 @@ class _RecorderPageState extends State<RecorderImagePage>
           ),
           FloatingActionButton.large(
             heroTag: "btn $index",
-            backgroundColor: Colors.red,
+            backgroundColor: _isOver1Min ? Colors.red : Colors.grey,
             onPressed: () {
               if (!_isRecording) {
                 setState(() {
-                  _recorderState = "現在請說話";
+                  _recorderState = "請講至少 1 分鐘";
                   _isRecording = !_isRecording;
+                  _isOver1Min = false;
                 });
                 startRecording();
               } else {
-                setState(() {
-                  _recorderState = "準備好後請按下按鈕";
-                  _isRecording = !_isRecording;
-                });
-                stopRecording();
+                if (_isOver1Min) {
+                  setState(() {
+                    _recorderState = "準備好後請按下按鈕";
+                    _isRecording = !_isRecording;
+                    _nextVisible = true;
+                  });
+                  stopRecording();
+                } else {}
               }
             },
             child: _isRecording
@@ -224,18 +230,21 @@ class _RecorderPageState extends State<RecorderImagePage>
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
-            onPressed: () {
-              submitWav();
-              runWhisper();
-              Provider.of<PageController>(context, listen: false).nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut);
-            },
-            child: const Text(
-              "下一題",
-              style: TextStyle(
-                fontSize: 28,
+          Visibility(
+            visible: _nextVisible,
+            child: ElevatedButton(
+              onPressed: () {
+                submitWav();
+                runWhisper();
+                Provider.of<PageController>(context, listen: false).nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut);
+              },
+              child: const Text(
+                "下一題",
+                style: TextStyle(
+                  fontSize: 28,
+                ),
               ),
             ),
           ),
@@ -403,9 +412,15 @@ class _RecorderPageState extends State<RecorderImagePage>
           var date = DateTime.fromMillisecondsSinceEpoch(
               e.duration.inMilliseconds,
               isUtc: true);
-          var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
+          var timeText = DateFormat('mm:ss', 'en_GB').format(date);
           setState(() {
-            _timerText = timeText.substring(0, 8);
+            _timerText =
+                "${timeText.substring(0, 2)}分${timeText.substring(3, 5)}秒";
+            if (date.minute >= 1) {
+              _isOver1Min = true;
+            } else {
+              _isOver1Min = false;
+            }
           });
         }, onError: (err) {
           print(err);
@@ -425,17 +440,17 @@ class _RecorderPageState extends State<RecorderImagePage>
     }
   }
 
-  Future<void> playFunc() async {
-    recordingPlayer.open(
-      Audio.file(pathToAudio),
-      autoStart: true,
-      showNotification: true,
-    );
-  }
+  // Future<void> playFunc() async {
+  //   recordingPlayer.open(
+  //     Audio.file(pathToAudio),
+  //     autoStart: true,
+  //     showNotification: true,
+  //   );
+  // }
 
-  Future<void> stopPlayFunc() async {
-    recordingPlayer.stop();
-  }
+  // Future<void> stopPlayFunc() async {
+  //   recordingPlayer.stop();
+  // }
 }
 
 // 请求存储权限
