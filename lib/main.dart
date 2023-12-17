@@ -1,9 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'swipe_test.dart';
 import 'report_page.dart';
-import 'dart:io';
+import 'report_list_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -100,9 +101,9 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReportPage(
-                            hostUrl: hostUrl,
-                          ),
+                          builder: (context) => ReportListPage(
+                              // hostUrl: hostUrl,
+                              ),
                         ));
                   },
                   child: const SizedBox(

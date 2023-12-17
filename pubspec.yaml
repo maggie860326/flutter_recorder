@@ -45,6 +45,7 @@ dependencies:
   
   cool_alert: ^2.0.1
   provider: ^6.1.1
+  flutter_slidable: ^3.0.1
   
 
 dev_dependencies:
