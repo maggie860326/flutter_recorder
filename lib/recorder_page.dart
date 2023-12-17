@@ -44,7 +44,6 @@ class _RecorderPageState extends State<RecorderPage>
   //看 whisper 完成了沒
   Completer completer = Completer();
 
-
   //各種路徑
   String appDocPath = "";
   String pathToAudio = "";
@@ -72,10 +71,10 @@ class _RecorderPageState extends State<RecorderPage>
   void initState() {
     super.initState();
     initializer();
-    print("m: 第 $index 頁 initialized.\n");
   }
 
   void initializer() async {
+    print("m: 第 $index 頁 initialized.\n");
     //要求權限
     await requestPermission(Permission.microphone);
 
@@ -411,6 +410,7 @@ class _RecorderPageState extends State<RecorderPage>
           print('subscription done!!');
         }, cancelOnError: false);
       }
+      print("m: 錄音檔位置 $pathToAudio");
       // getRecorderState();
     }
   }
