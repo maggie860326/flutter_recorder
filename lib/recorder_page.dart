@@ -22,14 +22,19 @@ class RecorderPage extends StatefulWidget {
       {Key? key,
       required this.index,
       required this.hostUrl,
-      required this.wavUrl})
+      required this.wavUrl,
+      required this.testDateTime})
       : super(key: key);
   final int index;
   final String hostUrl;
   final String wavUrl;
+  final String testDateTime;
   @override
-  State<RecorderPage> createState() =>
-      _RecorderPageState(index: index, hostUrl: hostUrl, wavUrl: wavUrl);
+  State<RecorderPage> createState() => _RecorderPageState(
+      index: index,
+      hostUrl: hostUrl,
+      wavUrl: wavUrl,
+      testDateTime: testDateTime);
 }
 
 class _RecorderPageState extends State<RecorderPage>
@@ -38,8 +43,13 @@ class _RecorderPageState extends State<RecorderPage>
   int index;
   final String hostUrl;
   final String wavUrl;
+  final String testDateTime;
+
   _RecorderPageState(
-      {required this.index, required this.hostUrl, required this.wavUrl});
+      {required this.index,
+      required this.hostUrl,
+      required this.wavUrl,
+      required this.testDateTime});
 
   //看 whisper 完成了沒
   Completer completer = Completer();
@@ -81,11 +91,10 @@ class _RecorderPageState extends State<RecorderPage>
     //取得路徑
     appDocPath = await _appDocPath;
     print("m: App Document Path is: $appDocPath");
-    pathToAudio = "$appDocPath/test1/recording/question$index.wav";
-    pathToText = "$appDocPath/test1/text/question$index.txt";
+
+    pathToAudio = "$appDocPath/test/$testDateTime/recording/question$index.wav";
+    pathToText = "$appDocPath/test/$testDateTime/text/question$index.txt";
     pathToModel = await _getFilePathFromAssets("ggml/ggml-tiny.bin");
-    // pathToModel = '/sdcard/Download/ggml-small.bin';
-    // pathToText = "$appDocPath/text/test1_question$index.txt";
 
     //recorder相關設定
     myRecorder = await FlutterSoundRecorder().openRecorder();

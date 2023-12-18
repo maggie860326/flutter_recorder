@@ -6,8 +6,9 @@ import 'recorder_image_page.dart';
 import 'test_instruction_page.dart';
 import 'test_end_page.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
+// import 'dart:async';
 import "report_page.dart";
+import 'package:intl/intl.dart' show DateFormat;
 
 class isCompleteProvider extends ChangeNotifier {
   //檢查 whisper 完成了沒
@@ -40,6 +41,7 @@ class _SwipeTestState extends State<SwipeTest> {
 
   late PageController controller;
   late String wavUrl;
+  String testDateTime = "";
 
   @override
   void dispose() {
@@ -52,6 +54,15 @@ class _SwipeTestState extends State<SwipeTest> {
     super.initState();
     controller = PageController(initialPage: initialPage);
     wavUrl = '$hostUrl/api_test/uploadWav';
+
+    // testDateTime = DateFormat('yyyy-MM-dd kk:mm', 'en_GB')
+    //     .format(DateTime.now())
+    //     .toString();
+
+    DateTime now = DateTime.now();
+    testDateTime = DateFormat('yyyy-MM-dd kk:mm').format(now);
+    // testDateTime = "testDate";
+    print("m: testDateTime = $testDateTime");
   }
 
   @override
@@ -62,14 +73,39 @@ class _SwipeTestState extends State<SwipeTest> {
       // Provider<bool>.value(
       //     value: completer0,
       //     builder: (context, child){return RecorderPage(index: 0, hostUrl: hostUrl, wavUrl: wavUrl);}),
-      RecorderPage(index: 0, hostUrl: hostUrl, wavUrl: wavUrl),
-      RecorderPage(index: 1, hostUrl: hostUrl, wavUrl: wavUrl),
-      RecorderPage(index: 2, hostUrl: hostUrl, wavUrl: wavUrl),
-      RecorderPage(index: 3, hostUrl: hostUrl, wavUrl: wavUrl),
-      RecorderPage(index: 4, hostUrl: hostUrl, wavUrl: wavUrl),
-      RecorderPage(index: 5, hostUrl: hostUrl, wavUrl: wavUrl),
+      RecorderPage(
+          index: 0,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
+          testDateTime: testDateTime),
+      RecorderPage(
+          index: 1,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
+          testDateTime: testDateTime),
+      RecorderPage(
+          index: 2,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
+          testDateTime: testDateTime),
+      RecorderPage(
+          index: 3,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
+          testDateTime: testDateTime),
+      RecorderPage(
+          index: 4,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
+          testDateTime: testDateTime),
+      RecorderPage(
+          index: 5,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
+          testDateTime: testDateTime),
       const TestInstructionPage(
-          instruction: "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
+          instruction:
+              "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
       RecorderImagePage(index: 6, hostUrl: hostUrl, wavUrl: wavUrl),
       RecorderImagePage(index: 7, hostUrl: hostUrl, wavUrl: wavUrl),
       RecorderImagePage(index: 8, hostUrl: hostUrl, wavUrl: wavUrl),
@@ -107,4 +143,15 @@ class _SwipeTestState extends State<SwipeTest> {
       ),
     );
   }
+
+  //儲存測驗日期時間
+  // Future<void> saveLastTest() async {
+  //     try{
+  //     final file = File("$appDocPath/last_test.txt");
+  //     file.writeAsString(str);
+  //     print("m: 成功寫入 $pathToText");
+  //   } catch (e) {
+  //     print("m: $e");
+  //   }
+  // }
 }
