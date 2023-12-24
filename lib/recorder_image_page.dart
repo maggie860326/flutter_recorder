@@ -22,14 +22,16 @@ class RecorderImagePage extends StatefulWidget {
       {Key? key,
       required this.index,
       required this.hostUrl,
-      required this.wavUrl})
+      required this.wavUrl,
+      required this.testDateTime})
       : super(key: key);
   final int index;
   final String hostUrl;
   final String wavUrl;
+  final String testDateTime;
   @override
   State<RecorderImagePage> createState() =>
-      _RecorderPageState(index: index, hostUrl: hostUrl, wavUrl: wavUrl);
+      _RecorderPageState(index: index, hostUrl: hostUrl, wavUrl: wavUrl,testDateTime: testDateTime);
 }
 
 class _RecorderPageState extends State<RecorderImagePage>
@@ -38,8 +40,10 @@ class _RecorderPageState extends State<RecorderImagePage>
   int index;
   final String hostUrl;
   final String wavUrl;
+  final String testDateTime;
   _RecorderPageState(
-      {required this.index, required this.hostUrl, required this.wavUrl});
+      {required this.index, required this.hostUrl, required this.wavUrl,
+      required this.testDateTime});
 
   //看 whisper 完成了沒
   Completer completer = Completer();

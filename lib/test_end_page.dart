@@ -12,11 +12,15 @@ import 'function.dart';
 
 class TestEndPage extends StatelessWidget {
   final String hostUrl;
-  const TestEndPage({super.key, required this.hostUrl});
+  final String taskIndex;
+   final String testDateTime;
+  const TestEndPage(
+      {super.key, required this.hostUrl, required this.taskIndex,
+      required this.testDateTime});
 
   @override
   Widget build(BuildContext context) {
-    final String textUrl = '$hostUrl/api_test/userInput';
+    final String textUrl = '$hostUrl/user/uploadJson';
 
     return Scaffold(
       body: Column(
@@ -52,40 +56,55 @@ class TestEndPage extends StatelessWidget {
       ),
     );
   }
-}
 
 //取得 app 專屬資料夾路徑
-Future<String> get _appDocPath async {
-  final directory = await getApplicationDocumentsDirectory();
-  // print(directory.path);
-  return directory.path;
-}
-
-void submitText(context, String textUrl) async {
-  String appDocPath = await _appDocPath;
-  final Map<String, String> jsonData = {};
-  try {
-    for (int i = 0; i < 9; i++) {
-      File file = await File("$appDocPath/test1/text/question$i.txt");
-      if (file.existsSync()) {
-        final text = await file.readAsString();
-        jsonData['$i'] = text;
-      } else {
-        await CoolAlert.show(
-          context: context,
-          type: CoolAlertType.info,
-          text: "第 ${i + 1} 題的錄音檔還未轉錄完成",
-        );
-        print("m: 第 ${i + 1} 題的錄音檔還未轉錄完成");
-        return;
-      }
-    }
-  } catch (e) {
-    print("m: $e");
+  Future<String> get _appDocPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    // print(directory.path);
+    return directory.path;
   }
-  print("m: $jsonData");
-  sendJsonDataToServer(textUrl, jsonData).then((response) {});
-  Provider.of<PageController>(context, listen: false).nextPage(
-      duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-  return;
+
+  void submitText(context, String textUrl) async {
+    int taskNum = 0;
+    switch (taskIndex) {
+      case "task_1":
+        taskNum = 6;
+        break;
+      case "task_2":
+        taskNum = 3;
+        break;
+      default:
+        print("m: 無法判斷為哪個 task");
+    }
+    String appDocPath = await _appDocPath;
+    final Map<String, String> jsonData = {};
+    //
+     jsonData[taskIndex] = "test";
+
+//
+    try {
+      for (int i = 0; i < taskNum; i++) {
+        File file = File("$appDocPath/test/$testDateTime/text/question$i.txt");
+        if (file.existsSync()) {
+          final text = await file.readAsString();
+          jsonData['$i'] = text;
+        } else {
+          await CoolAlert.show(
+            context: context,
+            type: CoolAlertType.info,
+            text: "第 ${i + 1} 題的錄音檔還未轉錄完成",
+          );
+          print("m: 第 ${i + 1} 題的錄音檔還未轉錄完成");
+          return;
+        }
+      }
+    } catch (e) {
+      print("m: $e");
+    }
+    print("m: $jsonData");
+    sendJsonDataToServer(textUrl, jsonData).then((response) {});
+    Provider.of<PageController>(context, listen: false).nextPage(
+        duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    return;
+  }
 }
