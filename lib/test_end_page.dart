@@ -13,9 +13,11 @@ import 'function.dart';
 class TestEndPage extends StatelessWidget {
   final String hostUrl;
   final String taskIndex;
-   final String testDateTime;
+  final String testDateTime;
   const TestEndPage(
-      {super.key, required this.hostUrl, required this.taskIndex,
+      {super.key,
+      required this.hostUrl,
+      required this.taskIndex,
       required this.testDateTime});
 
   @override
@@ -79,27 +81,27 @@ class TestEndPage extends StatelessWidget {
     String appDocPath = await _appDocPath;
     final Map<String, String> jsonData = {};
     //
-     jsonData[taskIndex] = "test";
+    jsonData[taskIndex] = "test";
 
-//
-    try {
-      for (int i = 0; i < taskNum; i++) {
-        File file = File("$appDocPath/test/$testDateTime/text/question$i.txt");
-        if (file.existsSync()) {
-          final text = await file.readAsString();
-          jsonData['$i'] = text;
-        } else {
-          await CoolAlert.show(
-            context: context,
-            type: CoolAlertType.info,
-            text: "第 ${i + 1} 題的錄音檔還未轉錄完成",
-          );
-          print("m: 第 ${i + 1} 題的錄音檔還未轉錄完成");
-          return;
-        }
+    for (int i = 0; i < taskNum; i++) {
+      // try {
+      File file = File("$appDocPath/test/$testDateTime/text/question$i.txt");
+      if (file.existsSync()) {
+        final text = await file.readAsString();
+        print("m: $text");
+        jsonData['$i'] = text;
+      } else {
+        await CoolAlert.show(
+          context: context,
+          type: CoolAlertType.info,
+          text: "第 ${i + 1} 題的錄音檔還未轉錄完成",
+        );
+        print("m: 第 ${i + 1} 題的錄音檔還未轉錄完成");
+        return;
       }
-    } catch (e) {
-      print("m: $e");
+      // } catch (e) {
+      //   print("m: $e");
+      // }
     }
     print("m: $jsonData");
     sendJsonDataToServer(textUrl, jsonData).then((response) {});

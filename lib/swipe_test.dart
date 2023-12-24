@@ -59,9 +59,9 @@ class _SwipeTestState extends State<SwipeTest> {
     //     .format(DateTime.now())
     //     .toString();
 
-    DateTime now = DateTime.now();
-    testDateTime = DateFormat('yyyy-MM-dd kk:mm').format(now);
-    // testDateTime = "testDate";
+    // DateTime now = DateTime.now();
+    // testDateTime = DateFormat('yyyy-MM-dd kk:mm').format(now);
+    testDateTime = "testDate";
     print("m: testDateTime = $testDateTime");
   }
 
@@ -103,17 +103,28 @@ class _SwipeTestState extends State<SwipeTest> {
           hostUrl: hostUrl,
           wavUrl: wavUrl,
           testDateTime: testDateTime),
-          TestEndPage(hostUrl: hostUrl, testDateTime: testDateTime,taskIndex: "task_1"),
+      TestEndPage(
+          hostUrl: hostUrl, testDateTime: testDateTime, taskIndex: "task_1"),
       const TestInstructionPage(
           instruction:
               "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
-      RecorderImagePage(index: 6, hostUrl: hostUrl, wavUrl: wavUrl,
+      RecorderImagePage(
+          index: 6,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
           testDateTime: testDateTime),
-      RecorderImagePage(index: 7, hostUrl: hostUrl, wavUrl: wavUrl,
+      RecorderImagePage(
+          index: 7,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
           testDateTime: testDateTime),
-      RecorderImagePage(index: 8, hostUrl: hostUrl, wavUrl: wavUrl,
+      RecorderImagePage(
+          index: 8,
+          hostUrl: hostUrl,
+          wavUrl: wavUrl,
           testDateTime: testDateTime),
-      TestEndPage(hostUrl: hostUrl, testDateTime: testDateTime, taskIndex: "task_2"),
+      TestEndPage(
+          hostUrl: hostUrl, testDateTime: testDateTime, taskIndex: "task_2"),
       ReportPage(hostUrl: hostUrl)
     ];
 
