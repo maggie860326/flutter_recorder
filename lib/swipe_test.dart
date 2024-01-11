@@ -10,34 +10,40 @@ import 'package:provider/provider.dart';
 import "report_page.dart";
 import 'package:intl/intl.dart' show DateFormat;
 
-class isCompleteProvider extends ChangeNotifier {
-  //檢查 whisper 完成了沒
-  var isCompleteList = [false, false, false, false, false, false];
+// class isCompleteProvider extends ChangeNotifier {
+//   //檢查 whisper 完成了沒
+//   var isCompleteList = [false, false, false, false, false, false];
 
-  bool isComplete(int index) => isCompleteList[index];
+//   bool isComplete(int index) => isCompleteList[index];
 
-  bool get isAllComplete => isCompleteList.every((key) => key == true);
+//   bool get isAllComplete => isCompleteList.every((key) => key == true);
 
-  setComplete(int index) {
-    isCompleteList[index] = true;
-    notifyListeners();
-  }
-}
+//   setComplete(int index) {
+//     isCompleteList[index] = true;
+//     notifyListeners();
+//   }
+// }
 
 class SwipeTest extends StatefulWidget {
   final int initialPage;
-  final String hostUrl;
+  // final String hostUrl;
   const SwipeTest(
-      {super.key, required this.initialPage, required this.hostUrl});
+      {super.key, required this.initialPage, 
+      // required this.hostUrl
+      });
   @override
   _SwipeTestState createState() =>
-      _SwipeTestState(initialPage: initialPage, hostUrl: hostUrl);
+      _SwipeTestState(initialPage: initialPage,
+      //  hostUrl: hostUrl
+       );
 }
 
 class _SwipeTestState extends State<SwipeTest> {
   final int initialPage;
-  final String hostUrl;
-  _SwipeTestState({required this.initialPage, required this.hostUrl});
+  // final String hostUrl;
+  _SwipeTestState({required this.initialPage, 
+  // required this.hostUrl
+  });
 
   late PageController controller;
   late String wavUrl;
@@ -53,7 +59,8 @@ class _SwipeTestState extends State<SwipeTest> {
   void initState() {
     super.initState();
     controller = PageController(initialPage: initialPage);
-    wavUrl = '$hostUrl/api_test/uploadWav';
+    // wavUrl = '$hostUrl/api_test/uploadWav';
+
 
     // testDateTime = DateFormat('yyyy-MM-dd kk:mm', 'en_GB')
     //     .format(DateTime.now())
@@ -75,46 +82,55 @@ class _SwipeTestState extends State<SwipeTest> {
       //     builder: (context, child){return RecorderPage(index: 0, hostUrl: hostUrl, wavUrl: wavUrl);}),
       RecorderPage(
           index: 0,
-          hostUrl: hostUrl,
-          wavUrl: wavUrl,
+          // hostUrl: hostUrl,
+          // wavUrl: wavUrl,
           testDateTime: testDateTime),
       RecorderPage(
           index: 1,
-          hostUrl: hostUrl,
-          wavUrl: wavUrl,
+          // hostUrl: hostUrl,
+          // wavUrl: wavUrl,
           testDateTime: testDateTime),
       RecorderPage(
           index: 2,
-          hostUrl: hostUrl,
-          wavUrl: wavUrl,
+          // hostUrl: hostUrl,
+          // wavUrl: wavUrl,
           testDateTime: testDateTime),
       RecorderPage(
           index: 3,
-          hostUrl: hostUrl,
-          wavUrl: wavUrl,
+          // hostUrl: hostUrl,
+          // wavUrl: wavUrl,
           testDateTime: testDateTime),
       RecorderPage(
           index: 4,
-          hostUrl: hostUrl,
-          wavUrl: wavUrl,
+          // hostUrl: hostUrl,
+          // wavUrl: wavUrl,
           testDateTime: testDateTime),
       RecorderPage(
           index: 5,
-          hostUrl: hostUrl,
-          wavUrl: wavUrl,
+          // hostUrl: hostUrl,
+          // wavUrl: wavUrl,
           testDateTime: testDateTime),
-          TestEndPage(hostUrl: hostUrl, testDateTime: testDateTime,taskIndex: "task_1"),
-      const TestInstructionPage(
-          instruction:
-              "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
-      RecorderImagePage(index: 6, hostUrl: hostUrl, wavUrl: wavUrl,
-          testDateTime: testDateTime),
-      RecorderImagePage(index: 7, hostUrl: hostUrl, wavUrl: wavUrl,
-          testDateTime: testDateTime),
-      RecorderImagePage(index: 8, hostUrl: hostUrl, wavUrl: wavUrl,
-          testDateTime: testDateTime),
-      TestEndPage(hostUrl: hostUrl, testDateTime: testDateTime, taskIndex: "task_2"),
-      ReportPage(hostUrl: hostUrl)
+      //     TestEndPage(
+      //       // hostUrl: hostUrl, 
+      //       testDateTime: testDateTime,taskIndex: "task_1"),
+      // const TestInstructionPage(
+      //     instruction:
+      //         "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
+      // RecorderImagePage(index: 6, 
+      // // hostUrl: hostUrl, wavUrl: wavUrl,
+      //     testDateTime: testDateTime),
+      // RecorderImagePage(index: 7, 
+      // // hostUrl: hostUrl, wavUrl: wavUrl,
+      //     testDateTime: testDateTime),
+      // RecorderImagePage(index: 8, 
+      // // hostUrl: hostUrl, wavUrl: wavUrl,
+      //     testDateTime: testDateTime),
+      // TestEndPage(
+      //   // hostUrl: hostUrl, 
+      //   testDateTime: testDateTime, taskIndex: "task_2"),
+      // ReportPage(
+      //   // hostUrl: hostUrl
+      //   )
     ];
 
     return Scaffold(

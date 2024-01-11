@@ -1,10 +1,12 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'swipe_test.dart';
 // import 'report_page.dart';
 import 'report_list_page.dart';
+import 'model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,17 +29,13 @@ class MyApp extends StatelessWidget {
         ),
         body: _FirstPage(),
       ),
-      // //todo: 註冊頁面
-      // routes: <String, WidgetBuilder>{
-      // '/SwipeTest': (_) => SwipeTest(initialPage: 0,),
-      // }
     );
   }
 }
 
 class _FirstPage extends StatelessWidget {
   //後端的路由
-  final String hostUrl = 'http://10.0.2.2:5000/';
+  // final String hostUrl = 'http://10.0.2.2:5000/';
 
   @override
   Widget build(BuildContext context) {
@@ -58,9 +56,19 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SwipeTest(
-                            initialPage: 3,
-                            hostUrl: hostUrl,
+                          builder: (context) => MultiProvider(
+                            providers: [
+                              Provider<UrlModel>(
+                                create: (ctx) => UrlModel(),
+                              ),
+                              Provider<PathModel>(
+                                create: (ctx) => PathModel(),
+                              )
+                            ],
+                            child: SwipeTest(
+                              initialPage: 3,
+                              // hostUrl: hostUrl,
+                            ),
                           ),
                         ));
                   },
@@ -80,9 +88,19 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SwipeTest(
-                            initialPage: 0,
-                            hostUrl: hostUrl,
+                          builder: (context) => MultiProvider(
+                            providers: [
+                              Provider<UrlModel>(
+                                create: (ctx) => UrlModel(),
+                              ),
+                              Provider<PathModel>(
+                                create: (ctx) => PathModel(),
+                              )
+                            ],
+                            child: SwipeTest(
+                              initialPage: 0,
+                              // hostUrl: hostUrl,
+                            ),
                           ),
                         ));
                   },
@@ -101,9 +119,19 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ReportListPage(
-                              // hostUrl: hostUrl,
+                          builder: (context) => MultiProvider(
+                            providers: [
+                              Provider<UrlModel>(
+                                create: (ctx) => UrlModel(),
                               ),
+                              Provider<PathModel>(
+                                create: (ctx) => PathModel(),
+                              )
+                            ],
+                            child: const ReportListPage(
+                                // hostUrl: hostUrl,
+                                ),
+                          ),
                         ));
                   },
                   child: const SizedBox(
