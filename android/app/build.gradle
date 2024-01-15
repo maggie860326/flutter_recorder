@@ -35,7 +35,7 @@ if (flutterVersionName == null) {
 android {
     namespace "com.example.recorder"
     compileSdkVersion flutter.compileSdkVersion
-    // ndkVersion "26.1.10909125"
+    ndkVersion "25.1.8937393"
     // externalNativeBuild {
         // cmake {
             // version "3.22.1"
