@@ -28,7 +28,7 @@ class _ReportListPageState extends State<ReportListPage> {
 
   getFileList() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = '${documentsDirectory.path}/test';
+    String path = '${documentsDirectory.path}/test/testDate/recording';
     print("m: 遍歷路徑 $path");
     setState(() {
       fileList = Directory(path).listSync();

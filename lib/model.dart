@@ -2,6 +2,8 @@
  Model的职责：Model只负责封装数据，不做任何其它操作。
  */
 
+import 'dart:math';
+
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,42 +11,38 @@ import 'dart:io';
 
 import 'package:recorder/function.dart';
 
-
-
 const String hostUrl = 'http://10.0.2.2:5000/';
 
 String wavUrl = '$hostUrl/api_test/uploadWav';
 
 String textUrl = '$hostUrl/user/uploadJson';
 
+// class UrlModel {
+//   final String hostUrl = 'http://10.0.2.2:5000/';
 
+//   String get wavUrl {
+//     return '$hostUrl/api_test/uploadWav';
+//   }
 
-class UrlModel {
-  final String hostUrl = 'http://10.0.2.2:5000/';
-
-  String get wavUrl {
-    return '$hostUrl/api_test/uploadWav';
-  }
-
-  String get textUrl {
-    return '$hostUrl/user/uploadJson';
-  }
-}
+//   String get textUrl {
+//     return '$hostUrl/user/uploadJson';
+//   }
+// }
 
 class PathModel {
-  final String testDateTime =
-      DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+  final String testDateTime = "testDate";
+  // DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
 
   Future<String> get appDocPath async {
     final directory = await getApplicationDocumentsDirectory();
-    print("m: App Document Path is: $appDocPath");
     return directory.path;
   }
 
   Future<String> get pathToModel async {
     const String path = 'ggml/ggml-tiny.bin';
-    var filePath = "$appDocPath/$path";
+    var filePath = "${await appDocPath}/$path";
     var file = File(filePath);
+
     //先確認 file 有沒有在 app 專屬資料夾中
     if (file.existsSync()) {
       print("m: $filePath 已存在");
@@ -64,16 +62,22 @@ class PathModel {
     }
   }
 
-  String pathToAudio(int index) {
-    return "$appDocPath/test/$testDateTime/recording/question$index.wav";
+  int _index = -1;
+  int get index => _index;
+  set index(int questionIndex) {
+    _index = questionIndex;
   }
 
-  String pathToText(int index) {
-    return "$appDocPath/test/$testDateTime/text/question$index.txt";
+  Future<String> get pathToAudio async {
+    return "${await appDocPath}/test/$testDateTime/recording/question$_index.wav";
   }
 
-  Future<void> submitWav(int index) async {
-    File wavFile = File(pathToAudio(index));
+  Future<String> get pathToText async {
+    return "$appDocPath/test/$testDateTime/text/question$_index.txt";
+  }
+
+  Future<void> submitWav() async {
+    File wavFile = File(await pathToAudio);
     if (wavFile.existsSync()) {
       String result = await sendWavFileToServer(wavUrl, wavFile);
       print("m: 傳送wav到後端結果: $result");

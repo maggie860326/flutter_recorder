@@ -7,6 +7,7 @@ import 'swipe_test.dart';
 // import 'report_page.dart';
 import 'report_list_page.dart';
 import 'model.dart';
+import 'view_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,10 +57,10 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MultiProvider(
+                          builder: (context) =>  MultiProvider(
                             providers: [
-                              Provider<UrlModel>(
-                                create: (ctx) => UrlModel(),
+                              ChangeNotifierProvider<WhisperViewModel>(
+                                create: (ctx) => WhisperViewModel(),
                               ),
                               Provider<PathModel>(
                                 create: (ctx) => PathModel(),
@@ -88,10 +89,10 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MultiProvider(
+                          builder: (context) =>  MultiProvider(
                             providers: [
-                              Provider<UrlModel>(
-                                create: (ctx) => UrlModel(),
+                              ChangeNotifierProvider<WhisperViewModel>(
+                                create: (ctx) => WhisperViewModel(),
                               ),
                               Provider<PathModel>(
                                 create: (ctx) => PathModel(),
@@ -121,8 +122,8 @@ class _FirstPage extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => MultiProvider(
                             providers: [
-                              Provider<UrlModel>(
-                                create: (ctx) => UrlModel(),
+                              ChangeNotifierProvider<WhisperViewModel>(
+                                create: (ctx) => WhisperViewModel(),
                               ),
                               Provider<PathModel>(
                                 create: (ctx) => PathModel(),
