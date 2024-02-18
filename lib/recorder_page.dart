@@ -41,7 +41,7 @@ class _RecorderPageState extends State<RecorderPage> {
   bool _playAudio = false;
   bool _isRecording = false;
   bool _isOver1Min = true;
-  bool _nextVisible = false;
+  bool invisible = false;
 
   String _timerText = '';
 
@@ -61,7 +61,7 @@ class _RecorderPageState extends State<RecorderPage> {
   }
 
   void initializer() async {
-    print("m: 第 $index 頁 initialized.\n");
+    // print("m: 第 $index 頁 initialized.\n");
     //要求權限
     await requestPermission(Permission.microphone);
 
@@ -85,16 +85,29 @@ class _RecorderPageState extends State<RecorderPage> {
       myRecorder!.closeRecorder();
       myRecorder = null;
     }
-    print("m: 第 $index 頁 disposed.\n");
+    // print("m: 第 $index 頁 disposed.\n");
   }
 
   @override
   Widget build(BuildContext context) {
-    print("m: 第 $index 頁 build");
+    // print("m: 第 $index 頁 build");
 
     PathModel pathModel = Provider.of<PathModel>(context, listen: false);
     pathModel.index = index;
-    Future<String> pathToAudio = pathModel.pathToAudio;
+    Future<String> pathToAudio = pathModel.pathToAudio();
+    String? imagePath = questionList[index].imagePath;
+
+    List<Widget> question = [
+                Text(
+                  questionList[index].description, //! 代入題目描述
+                  style: const TextStyle(fontSize: 20, color: Colors.black),
+                ),
+                
+              ];
+
+    if(imagePath!=null){//! 代入圖片
+      question.add(Image.asset(imagePath));
+    }
 
     return Scaffold(
       body: Column(
@@ -105,7 +118,7 @@ class _RecorderPageState extends State<RecorderPage> {
           ),
           // height: 50,
           Text(
-            "問題 ${index + 1}",
+            questionList[index].name, //! 代入題目編號
             style: const TextStyle(fontSize: 20, color: Colors.black),
           ),
 
@@ -117,9 +130,8 @@ class _RecorderPageState extends State<RecorderPage> {
               border: Border.all(color: Colors.blue, width: 0.5),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
-            child: Text(
-              questions[index],
-              style: const TextStyle(fontSize: 20, color: Colors.black),
+            child: Column(
+              children: question
             ),
           ),
           Text(
@@ -139,33 +151,37 @@ class _RecorderPageState extends State<RecorderPage> {
           const SizedBox(
             height: 20,
           ),
-          FloatingActionButton.large(
-            heroTag: "btn $index",
-            backgroundColor: _isOver1Min ? Colors.red : Colors.grey,
-            onPressed: () {
-              if (!_isRecording) {
-                setState(() {
-                  _recorderState = "請講至少 1 分鐘";
-                  _isRecording = !_isRecording;
-                  _isOver1Min = false;
-                });
-                startRecording(pathToAudio);
-              } else {
-                if (_isOver1Min) {
+          Offstage(
+            offstage: invisible,
+            child: FloatingActionButton.large(
+              heroTag: "btn $index",
+              backgroundColor: _isOver1Min ? Colors.red : Colors.grey,
+              onPressed: () {
+                if (!_isRecording) {
+                  setState(() {
+                    _recorderState = "請講至少 1 分鐘";
+                    _isRecording = !_isRecording;
+                    _isOver1Min = false;
+                  });
+                  startRecording(pathToAudio);
+                } else {
+                  //! 控制1分鐘才能按停止
+                  // if (_isOver1Min) {
                   setState(() {
                     _recorderState = "準備好後請按下按鈕";
                     _isRecording = !_isRecording;
-                    _nextVisible = true;
+                    invisible = true;
                   });
                   stopRecording();
-                } else {}
-              }
-            },
-            child: _isRecording
-                ? const Icon(
-                    Icons.stop,
-                  )
-                : const Icon(Icons.mic),
+                  // } else {}
+                }
+              },
+              child: _isRecording
+                  ? const Icon(
+                      Icons.stop,
+                    )
+                  : const Icon(Icons.mic),
+            ),
           ),
           const SizedBox(
             height: 20,
@@ -206,22 +222,25 @@ class _RecorderPageState extends State<RecorderPage> {
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
-            onPressed: () {
-              pathModel.submitWav();
-              Provider.of<WhisperViewModel>(context, listen: false)
-                  .runWhisper(context, pathModel);
-              Provider.of<PageController>(context, listen: false).nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut);
-            },
-            child: const Text(
-              "下一題",
-              style: TextStyle(
-                fontSize: 28,
+          Offstage(
+            offstage: !invisible,
+            child: ElevatedButton(
+              onPressed: () {
+                // pathModel.submitWav();
+                Provider.of<WhisperViewModel>(context, listen: false)
+                    .runWhisper(context, pathModel);
+                Provider.of<PageController>(context, listen: false).nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut);
+              },
+              child: const Text(
+                "下一題",
+                style: TextStyle(
+                  fontSize: 28,
+                ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );

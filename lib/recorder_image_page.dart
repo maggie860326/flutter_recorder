@@ -90,7 +90,7 @@ class _RecorderImagePageState extends State<RecorderImagePage> {
 
     PathModel pathModel = Provider.of<PathModel>(context, listen: false);
     pathModel.index = index;
-    Future<String> pathToAudio = pathModel.pathToAudio;
+    Future<String> pathToAudio = pathModel.pathToAudio();
 
     return Scaffold(
       body: Column(

@@ -78,33 +78,39 @@ class _SwipeTestState extends State<SwipeTest> {
     final List<Widget> pages = [
       const TestInstructionPage(
           instruction: "在接下來的測驗中，你會看到一組問題，請您看完問題後，按下錄音按鈕並開始回答。錄音長度須至少一分鐘。"),
-      // Provider<bool>.value(
-      //     value: completer0,
-      //     builder: (context, child){return RecorderPage(index: 0, hostUrl: hostUrl, wavUrl: wavUrl);}),
-      RecorderPage(index: 0,),
-      RecorderPage(index: 1,),
-      RecorderPage(index: 2,),
-      RecorderPage(index: 3,),
-      RecorderPage(index: 4,),
-      RecorderPage(index: 5,),
-      //     TestEndPage(
-      //       // hostUrl: hostUrl,
-      //       testDateTime: testDateTime,taskIndex: "task_1"),
-      // const TestInstructionPage(
-      //     instruction:
-      //         "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
-      // RecorderImagePage(index: 6,
-      // // hostUrl: hostUrl, wavUrl: wavUrl,
-      //     testDateTime: testDateTime),
-      // RecorderImagePage(index: 7,
-      // // hostUrl: hostUrl, wavUrl: wavUrl,
-      //     testDateTime: testDateTime),
-      // RecorderImagePage(index: 8,
-      // // hostUrl: hostUrl, wavUrl: wavUrl,
-      //     testDateTime: testDateTime),
-      // TestEndPage(
-      //   // hostUrl: hostUrl,
-      //   testDateTime: testDateTime, taskIndex: "task_2"),
+
+      RecorderPage(
+        index: 0,
+      ),
+      RecorderPage(
+        index: 1,
+      ),
+      RecorderPage(
+        index: 2,
+      ),
+      RecorderPage(
+        index: 3,
+      ),
+      RecorderPage(
+        index: 4,
+      ),
+      RecorderPage(
+        index: 5,
+      ),
+
+      const TestInstructionPage(
+          instruction:
+              "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
+      RecorderPage(
+        index: 6,
+      ),
+      RecorderPage(
+        index: 7,
+      ),
+      RecorderPage(
+        index: 8,
+      ),
+      TestEndPage(),
       // ReportPage(
       //   // hostUrl: hostUrl
       //   )
