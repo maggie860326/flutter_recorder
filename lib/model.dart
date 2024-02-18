@@ -1,20 +1,17 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 /*
  Model的职责：Model只负责封装数据，不做任何其它操作。
  */
 
 import 'dart:math';
-
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-
 import 'package:recorder/function.dart';
 
 const String hostUrl = 'http://10.0.2.2:5000/';
-
 String wavUrl = '$hostUrl/api_test/uploadWav';
-
 String textUrl = '$hostUrl/user/uploadJson';
 
 // class UrlModel {
@@ -28,6 +25,40 @@ String textUrl = '$hostUrl/user/uploadJson';
 //     return '$hostUrl/user/uploadJson';
 //   }
 // }
+
+class Question {
+  final String name;
+  final String description;
+  final String? imagePath;
+  Question({
+    required this.name,
+    required this.description,
+    this.imagePath,
+  });
+}
+
+List<Question> questionList = <Question>[
+  Question(
+      name: "回答問題1",
+      description: "請您跟我聊聊您的家鄉，\n您的家鄉在哪呢？您到目前為止在您的家鄉住的時間久嗎？有什麼回憶嗎？"),
+  Question(name: "回答問題2", description: "若在台灣有颱風預報時，通常會需要準備什麼？發生什麼事？"),
+  Question(name: "回答問題3", description: "請問您昨天晚餐在哪裡吃飯？吃什麼？請描述細節及內容。"),
+  Question(name: "回答問題4", description: "若您想要泡一杯茶或咖啡，您會怎麼做？請描述細節及內容。"),
+  Question(name: "回答問題5", description: "請您跟我聊聊您最近喜歡看的節目是什麼？ 從電視、Youtube或廣播"),
+  Question(name: "回答問題6", description: "一年中的四季，您最喜歡哪一個季節？為什麼？"),
+  Question(
+      name: "描述圖片1",
+      description: "請描述圖片的內容",
+      imagePath: "assets/image/picture1.jpg"),
+  Question(
+      name: "描述圖片2",
+      description: "請描述圖片的內容",
+      imagePath: "assets/image/picture2.jpg"),
+  Question(
+      name: "描述圖片3",
+      description: "請描述圖片的內容",
+      imagePath: "assets/image/picture3.jpg"),
+];
 
 class PathModel {
   final String testDateTime = "testDate";
@@ -68,21 +99,27 @@ class PathModel {
     _index = questionIndex;
   }
 
-  Future<String> get pathToAudio async {
-    return "${await appDocPath}/test/$testDateTime/recording/question$_index.wav";
+  Future<String> pathToAudio({int? index}) async {
+    index ??= _index;
+    return "${await appDocPath}/test/$testDateTime/recording/question$index.wav";
   }
 
-  Future<String> get pathToText async {
-    return "$appDocPath/test/$testDateTime/text/question$_index.txt";
+  Future<String> pathToText({int? index}) async {
+    index ??= _index;
+    return "${await appDocPath}/test/$testDateTime/text/question$index.txt";
   }
 
   Future<void> submitWav() async {
-    File wavFile = File(await pathToAudio);
+    File wavFile = File(await pathToAudio());
     if (wavFile.existsSync()) {
       String result = await sendWavFileToServer(wavUrl, wavFile);
       print("m: 傳送wav到後端結果: $result");
     } else {
       print("m: wav 檔不存在");
     }
+  }
+
+  PathModel copyWith() {
+    return PathModel();
   }
 }
