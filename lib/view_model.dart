@@ -20,7 +20,7 @@ enum ViewState {
 class WhisperViewModel with ChangeNotifier {
   List<ViewState> _states = List.generate(9, (i) => ViewState.idle);
 
-  // ViewState get state => _state;
+  List<ViewState> get states => _states;
 
   set isRunning(int index) {
     _states[index] = ViewState.running;
@@ -34,8 +34,12 @@ class WhisperViewModel with ChangeNotifier {
 
 //執行Whisper
   Future<void> runWhisper(BuildContext context, PathModel pathModel) async {
-    File audioFile = File(await pathModel.pathToAudio);
+    // PathModel pathModel = pathModel.copyWith();
+    print("m: whisper index = ${pathModel.index}");
+    File audioFile = File(await pathModel.pathToAudio());
     File modelFile = File(await pathModel.pathToModel);
+    int index = pathModel.index;
+    String pathToText = await pathModel.pathToText();
 
     //檢查 audio 檔案是否存在
     if (!audioFile.existsSync()) {
@@ -55,13 +59,13 @@ class WhisperViewModel with ChangeNotifier {
     }
 
 // Whisper
-    print("m: Start transcribe");
+    print("m: Whisper start transcribe");
     DateTime startTimestamp = DateTime.now();
     Whisper whisper = Whisper(
       whisperLib: "libwhisper.so",
     );
     //通知訂閱者 whisper 開始執行
-    _states[pathModel.index] = ViewState.running;
+    _states[index] = ViewState.running;
     notifyListeners();
 
     try {
@@ -77,35 +81,50 @@ class WhisperViewModel with ChangeNotifier {
       DateTime endTimestamp = DateTime.now();
       Duration timeElapsed = endTimestamp.difference(startTimestamp);
       print("m: Time elapsed:  ${timeElapsed.inMilliseconds} milliseconds");
-      _states[pathModel.index] = ViewState.success;
+      _states[index] = ViewState.success;
       String? text = res.text;
       if (text != null) {
-        await _saveText(text, pathModel);
+        await _saveText(text, pathToText, index);
       }
-      print("m: $text");
+      print("m: Whisper 轉錄文字=$text");
       //通知訂閱者 whisper 成功
       notifyListeners();
     } catch (e) {
       //通知訂閱者 whisper 失敗
-      _states[pathModel.index] = ViewState.failure;
+      _states[index] = ViewState.failure;
       notifyListeners();
     }
     return;
   }
 
   //儲存轉錄文字
-  Future<void> _saveText(String str, PathModel pathModel) async {
-    Directory directory = Directory(path.dirname(await pathModel.pathToText));
+  Future<void> _saveText(String str, String pathToText, int index) async {
+    print("m: Whisper submitText: index=$index, pathToText=$pathToText");
+    Directory directory = Directory(path.dirname(pathToText));
     try {
       if (!directory.existsSync()) {
         directory.createSync(recursive: true);
       }
-      final file = File(await pathModel.pathToText);
+      final file = File(pathToText);
       file.writeAsString(str);
-      print("m: 成功寫入 ${await pathModel.pathToText}");
-      _states[pathModel.index] = ViewState.textSaved;
+      print("m: 成功寫入 $pathToText");
+      _states[index] = ViewState.textSaved;
     } catch (e) {
       print("m: $e");
+    }
+  }
+
+  void checkTextSaved(PathModel pathModel) async {
+    for (int i = 0; i < 9; i++) {
+      String pathToText = await pathModel.pathToText(index: i);
+      File file = File(pathToText);
+      if (file.existsSync()) {
+        // print("m: checkTextSaved 存在 $pathToText");
+        _states[i] = ViewState.textSaved;
+        notifyListeners();
+      } else {
+        // print("m: checkTextSaved 不存在 $pathToText");
+      }
     }
   }
 }
