@@ -40,8 +40,11 @@ class _RecorderPageState extends State<RecorderPage> {
   String _recorderState = "準備好後請按下按鈕";
   bool _playAudio = false;
   bool _isRecording = false;
+  bool _isOver1Min = true;
+  bool _nextVisible = false;
 
-  String _timerText = '00:00:00';
+  String _timerText = '';
+
   List<String> questions = [
     "請您跟我聊聊您的家鄉，\n您的家鄉在哪呢？您到目前為止在您的家鄉住的時間久嗎？有什麼回憶嗎？",
     "若在台灣有颱風預報時，通常會需要準備什麼？發生什麼事？",
@@ -107,9 +110,9 @@ class _RecorderPageState extends State<RecorderPage> {
           ),
 
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(0),
             margin: const EdgeInsets.all(20),
-            height: 150,
+            // height: 150,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.blue, width: 0.5),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
@@ -138,20 +141,24 @@ class _RecorderPageState extends State<RecorderPage> {
           ),
           FloatingActionButton.large(
             heroTag: "btn $index",
-            backgroundColor: Colors.red,
+            backgroundColor: _isOver1Min ? Colors.red : Colors.grey,
             onPressed: () {
               if (!_isRecording) {
                 setState(() {
-                  _recorderState = "現在請說話";
+                  _recorderState = "請講至少 1 分鐘";
                   _isRecording = !_isRecording;
+                  _isOver1Min = false;
                 });
                 startRecording(pathToAudio);
               } else {
-                setState(() {
-                  _recorderState = "準備好後請按下按鈕";
-                  _isRecording = !_isRecording;
-                });
-                stopRecording();
+                if (_isOver1Min) {
+                  setState(() {
+                    _recorderState = "準備好後請按下按鈕";
+                    _isRecording = !_isRecording;
+                    _nextVisible = true;
+                  });
+                  stopRecording();
+                } else {}
               }
             },
             child: _isRecording
@@ -241,9 +248,15 @@ class _RecorderPageState extends State<RecorderPage> {
           var date = DateTime.fromMillisecondsSinceEpoch(
               e.duration.inMilliseconds,
               isUtc: true);
-          var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
+          var timeText = DateFormat('mm:ss', 'en_GB').format(date);
           setState(() {
-            _timerText = timeText.substring(0, 8);
+            _timerText =
+                "${timeText.substring(0, 2)}分${timeText.substring(3, 5)}秒";
+            if (date.minute >= 1) {
+              _isOver1Min = true;
+            } else {
+              _isOver1Min = false;
+            }
           });
         }, onError: (err) {
           print(err);
