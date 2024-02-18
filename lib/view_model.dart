@@ -13,6 +13,7 @@ enum ViewState {
   running, // 執行中
   success, // 轉錄成功
   failure, // 加载失败
+  textSaved, //已儲存文字檔
 }
 
 // 用來保存每個whisper的運作狀態
@@ -76,13 +77,13 @@ class WhisperViewModel with ChangeNotifier {
       DateTime endTimestamp = DateTime.now();
       Duration timeElapsed = endTimestamp.difference(startTimestamp);
       print("m: Time elapsed:  ${timeElapsed.inMilliseconds} milliseconds");
+      _states[pathModel.index] = ViewState.success;
       String? text = res.text;
       if (text != null) {
-        await _saveText(text, await pathModel.pathToText);
+        await _saveText(text, pathModel);
       }
       print("m: $text");
-       //通知訂閱者 whisper 成功
-      _states[pathModel.index] = ViewState.success;
+      //通知訂閱者 whisper 成功
       notifyListeners();
     } catch (e) {
       //通知訂閱者 whisper 失敗
@@ -93,15 +94,16 @@ class WhisperViewModel with ChangeNotifier {
   }
 
   //儲存轉錄文字
-  Future<void> _saveText(String str, String pathToText) async {
-    Directory directory = Directory(path.dirname(pathToText));
+  Future<void> _saveText(String str, PathModel pathModel) async {
+    Directory directory = Directory(path.dirname(await pathModel.pathToText));
     try {
       if (!directory.existsSync()) {
         directory.createSync(recursive: true);
       }
-      final file = File(pathToText);
+      final file = File(await pathModel.pathToText);
       file.writeAsString(str);
-      print("m: 成功寫入 $pathToText");
+      print("m: 成功寫入 ${await pathModel.pathToText}");
+      _states[pathModel.index] = ViewState.textSaved;
     } catch (e) {
       print("m: $e");
     }
