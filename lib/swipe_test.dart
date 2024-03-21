@@ -1,28 +1,16 @@
 // ignore_for_file: file_names, camel_case_types
 
 import 'package:flutter/material.dart';
+import 'package:recorder/model.dart';
 import 'recorder_page.dart';
-import 'recorder_image_page.dart';
 import 'test_instruction_page.dart';
 import 'test_end_page.dart';
 import 'package:provider/provider.dart';
 // import 'dart:async';
 import "report_page.dart";
 import 'package:intl/intl.dart' show DateFormat;
-
-// class isCompleteProvider extends ChangeNotifier {
-//   //檢查 whisper 完成了沒
-//   var isCompleteList = [false, false, false, false, false, false];
-
-//   bool isComplete(int index) => isCompleteList[index];
-
-//   bool get isAllComplete => isCompleteList.every((key) => key == true);
-
-//   setComplete(int index) {
-//     isCompleteList[index] = true;
-//     notifyListeners();
-//   }
-// }
+import 'testAPI.dart';
+import 'config.dart';
 
 class SwipeTest extends StatefulWidget {
   final int initialPage;
@@ -49,7 +37,7 @@ class _SwipeTestState extends State<SwipeTest> {
 
   late PageController controller;
   late String wavUrl;
-  String testDateTime = "";
+  // String testDateTime = "";
 
   @override
   void dispose() {
@@ -61,62 +49,23 @@ class _SwipeTestState extends State<SwipeTest> {
   void initState() {
     super.initState();
     controller = PageController(initialPage: initialPage);
-    // wavUrl = '$hostUrl/api_test/uploadWav';
 
-    // testDateTime = DateFormat('yyyy-MM-dd kk:mm', 'en_GB')
-    //     .format(DateTime.now())
-    //     .toString();
+    // testDateTime = "testDate";
 
-    // DateTime now = DateTime.now();
-    // testDateTime = DateFormat('yyyy-MM-dd kk:mm').format(now);
-    testDateTime = "testDate";
+    DateTime now = DateTime.now();
+
+    PathModel pathModel = Provider.of<PathModel>(context, listen: false);
+    String testDateTime = pathModel.setTestDateTime();
     print("m: testDateTime = $testDateTime");
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      const TestInstructionPage(
-          instruction: "在接下來的測驗中，你會看到一組問題，請您看完問題後，按下錄音按鈕並開始回答。錄音長度須至少一分鐘。"),
-
-      RecorderPage(
-        index: 0,
-      ),
-      RecorderPage(
-        index: 1,
-      ),
-      RecorderPage(
-        index: 2,
-      ),
-      RecorderPage(
-        index: 3,
-      ),
-      RecorderPage(
-        index: 4,
-      ),
-      RecorderPage(
-        index: 5,
-      ),
-
-      const TestInstructionPage(
-          instruction:
-              "在接下來的測驗中，你每次會看到一張圖片，請您按下錄音按鈕並盡可能描述圖片中發生的事情與細節。錄音長度須至少一分鐘。"),
-      RecorderPage(
-        index: 6,
-      ),
-      RecorderPage(
-        index: 7,
-      ),
-      RecorderPage(
-        index: 8,
-      ),
-      TestEndPage(),
-      // ReportPage(
-      //   // hostUrl: hostUrl
-      //   )
-    ];
+    //產生編號1~6的題目頁面
+    // final List<RecorderPage> task1_list = List<RecorderPage>.generate(6, (i) => RecorderPage(index: i+1));
 
     return Scaffold(
+      
       appBar: AppBar(title: const Text("測驗流程"), actions: [
         IconButton(
             onPressed: () => controller.previousPage(

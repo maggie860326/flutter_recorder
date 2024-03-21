@@ -12,6 +12,8 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:recorder/model.dart';
 import 'package:recorder/view_model.dart';
 import 'package:provider/provider.dart';
+import 'config.dart';
+import 'function.dart';
 
 class RecorderPage extends StatefulWidget {
   const RecorderPage({
@@ -91,21 +93,23 @@ class _RecorderPageState extends State<RecorderPage> {
   @override
   Widget build(BuildContext context) {
     // print("m: 第 $index 頁 build");
+    // List<Question> questionList = task_1_Q + task_2_Q;
 
     PathModel pathModel = Provider.of<PathModel>(context, listen: false);
     pathModel.index = index;
     Future<String> pathToAudio = pathModel.pathToAudio();
     String? imagePath = questionList[index].imagePath;
+    // String? question = questionList[index].description;
 
     List<Widget> question = [
-                Text(
-                  questionList[index].description, //! 代入題目描述
-                  style: const TextStyle(fontSize: 20, color: Colors.black),
-                ),
-                
-              ];
+      Text(
+        questionList[index].description!, //! 代入題目描述
+        style: const TextStyle(fontSize: 20, color: Colors.black),
+      ),
+    ];
 
-    if(imagePath!=null){//! 代入圖片
+    if (imagePath != null) {
+      //! 代入圖片
       question.add(Image.asset(imagePath));
     }
 
@@ -118,7 +122,7 @@ class _RecorderPageState extends State<RecorderPage> {
           ),
           // height: 50,
           Text(
-            questionList[index].name, //! 代入題目編號
+            "${questionList[index].task_name}${questionList[index].questionNo}", //! 代入題目編號
             style: const TextStyle(fontSize: 20, color: Colors.black),
           ),
 
@@ -130,9 +134,7 @@ class _RecorderPageState extends State<RecorderPage> {
               border: Border.all(color: Colors.blue, width: 0.5),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
-            child: Column(
-              children: question
-            ),
+            child: Column(children: question),
           ),
           Text(
             _recorderState,
@@ -226,7 +228,7 @@ class _RecorderPageState extends State<RecorderPage> {
             offstage: !invisible,
             child: ElevatedButton(
               onPressed: () {
-                // pathModel.submitWav();
+                submitWav(pathModel);
                 Provider.of<WhisperViewModel>(context, listen: false)
                     .runWhisper(context, pathModel);
                 Provider.of<PageController>(context, listen: false).nextPage(
@@ -297,11 +299,15 @@ class _RecorderPageState extends State<RecorderPage> {
   }
 
   Future<void> playFunc(Future<String> pathToAudio) async {
-    recordingPlayer.open(
-      Audio.file(await pathToAudio),
-      autoStart: true,
-      showNotification: true,
-    );
+    try {
+      recordingPlayer.open(
+        Audio.file(await pathToAudio),
+        autoStart: true,
+        showNotification: true,
+      );
+    } catch (e) {
+      print("m: playFunc error: $e");
+    }
   }
 
   Future<void> stopPlayFunc() async {

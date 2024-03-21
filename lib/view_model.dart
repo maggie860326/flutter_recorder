@@ -7,6 +7,7 @@ import 'dart:io';
 import "package:whisper_flutter/whisper_flutter.dart";
 import 'function.dart';
 import 'package:path/path.dart' as path;
+import 'config.dart';
 
 enum ViewState {
   idle, // 沒作用
@@ -16,9 +17,12 @@ enum ViewState {
   textSaved, //已儲存文字檔
 }
 
+// List<Question> questionList = task_1_Q;
+
 // 用來保存每個whisper的運作狀態
 class WhisperViewModel with ChangeNotifier {
-  List<ViewState> _states = List.generate(9, (i) => ViewState.idle);
+  List<ViewState> _states =
+      List.generate(questionList.length, (i) => ViewState.idle);
 
   List<ViewState> get states => _states;
 
@@ -114,9 +118,11 @@ class WhisperViewModel with ChangeNotifier {
     }
   }
 
+//確認有沒有已經存好的文字檔，如果有則將其狀態設為 textSaved
   void checkTextSaved(PathModel pathModel) async {
-    for (int i = 0; i < 9; i++) {
-      String pathToText = await pathModel.pathToText(index: i);
+    print("m: 檢查已存在的文字檔");
+    for (int i = 0; i < questionList.length; i++) {
+      String pathToText = await pathModel.pathToText(i);
       File file = File(pathToText);
       if (file.existsSync()) {
         // print("m: checkTextSaved 存在 $pathToText");
@@ -126,5 +132,26 @@ class WhisperViewModel with ChangeNotifier {
         // print("m: checkTextSaved 不存在 $pathToText");
       }
     }
+  }
+
+  bool ifAllDoneThenSendTextToServer(
+      PathModel pathModel) {
+    bool isDone = true;
+    for (int i = 0; i < questionList.length; i++) {
+      if (_states[i] == ViewState.textSaved) {
+        continue;
+      } else {
+        print("m: ifAllDoneThenSendTextToServer: Not yet.");
+        isDone = false;
+        break;
+      }
+    }
+    if (isDone) {
+      print("m: ifAllDoneThenSendTextToServer: All done. Call submitText.");
+      
+      submitText(pathModel, 0);
+      // submitText(pathModel, 1);
+    }
+    return isDone;
   }
 }

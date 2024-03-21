@@ -8,6 +8,7 @@ import 'swipe_test.dart';
 import 'report_list_page.dart';
 import 'model.dart';
 import 'view_model.dart';
+import 'test_radar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Change Page',
       theme: ThemeData(
         primarySwatch: Colors.green,
@@ -42,6 +44,7 @@ class _FirstPage extends StatelessWidget {
   Widget build(BuildContext context) {
     print("m: 這支手機的 Processors 數量為  ${Platform.numberOfProcessors}");
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
           colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
@@ -57,7 +60,7 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>  MultiProvider(
+                          builder: (context) => MultiProvider(
                             providers: [
                               ChangeNotifierProvider<WhisperViewModel>(
                                 create: (ctx) => WhisperViewModel(),
@@ -66,10 +69,7 @@ class _FirstPage extends StatelessWidget {
                                 create: (ctx) => PathModel(),
                               )
                             ],
-                            child: SwipeTest(
-                              initialPage: 3,
-                              // hostUrl: hostUrl,
-                            ),
+                            child: ReportChartPage(),
                           ),
                         ));
                   },
@@ -89,7 +89,7 @@ class _FirstPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>  MultiProvider(
+                          builder: (context) => MultiProvider(
                             providers: [
                               ChangeNotifierProvider<WhisperViewModel>(
                                 create: (ctx) => WhisperViewModel(),
