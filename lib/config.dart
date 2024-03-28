@@ -7,10 +7,10 @@ import "dart:core";
 import "package:flutter/material.dart";
 import "package:recorder/test_end_page.dart";
 import "recorder_page.dart";
-import "report_chart_page.dart";
-import "testAPI.dart";
 import "test_instruction_page.dart";
 import "report_chart_page2.dart";
+import 'user_id_page.dart';
+
 
 //後端路由
 const String hostUrl = 'http://140.116.158.105:80';
@@ -120,6 +120,7 @@ List<Question> task_1_Q = List<Question>.generate(
 //         questionNo: index + 1));
 
 List<Widget> pages = [
+  UserIDPage(),
   TestInstructionPage(instruction: taskList[0].taskInstruction),
   RecorderPage(index: 0),
   RecorderPage(index: 1),

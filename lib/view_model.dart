@@ -26,44 +26,43 @@ class WhisperViewModel with ChangeNotifier {
 
   List<ViewState> get states => _states;
 
-  set isRunning(int index) {
-    _states[index] = ViewState.running;
-    notifyListeners();
-  }
+  // set isRunning(int index) {
+  //   _states[index] = ViewState.running;
+  //   notifyListeners();
+  // }
 
-  set isSuccess(int index) {
-    _states[index] = ViewState.success;
-    notifyListeners();
-  }
+  // set isSuccess(int index) {
+  //   _states[index] = ViewState.success;
+  //   notifyListeners();
+  // }
 
 //執行Whisper
   Future<void> runWhisper(BuildContext context, PathModel pathModel) async {
     // PathModel pathModel = pathModel.copyWith();
-    print("m: whisper index = ${pathModel.index}");
     File audioFile = File(await pathModel.pathToAudio());
     File modelFile = File(await pathModel.pathToModel);
     int index = pathModel.index;
     String pathToText = await pathModel.pathToText();
 
-    //檢查 audio 檔案是否存在
-    if (!audioFile.existsSync()) {
-      await CoolAlert.show(
-        context: context,
-        type: CoolAlertType.info,
-        text: "找不到此音檔",
-      );
-      print("m: audio is empty");
-      return;
-    } //檢查 model 檔案是否存在
-    else if (!modelFile.existsSync()) {
-      await CoolAlert.show(
-          context: context, type: CoolAlertType.info, text: "找不到此 model");
-      print("m: model is empty");
-      return;
-    }
+    // //檢查 audio 檔案是否存在
+    // if (!audioFile.existsSync()) {
+    //   await CoolAlert.show(
+    //     context: context,
+    //     type: CoolAlertType.info,
+    //     text: "找不到此音檔",
+    //   );
+    //   print("m: audio is empty");
+    //   return;
+    // } //檢查 model 檔案是否存在
+    // else if (!modelFile.existsSync()) {
+    //   await CoolAlert.show(
+    //       context: context, type: CoolAlertType.info, text: "找不到此 model");
+    //   // print("m: model is empty");
+    //   return;
+    // }
 
 // Whisper
-    print("m: Whisper start transcribe");
+    // print("m: Whisper start transcribe");
     DateTime startTimestamp = DateTime.now();
     Whisper whisper = Whisper(
       whisperLib: "libwhisper.so",
@@ -90,7 +89,7 @@ class WhisperViewModel with ChangeNotifier {
       if (text != null) {
         await _saveText(text, pathToText, index);
       }
-      print("m: Whisper 轉錄文字=$text");
+      // print("m: Whisper 轉錄文字=$text");
       //通知訂閱者 whisper 成功
       notifyListeners();
     } catch (e) {
@@ -103,7 +102,7 @@ class WhisperViewModel with ChangeNotifier {
 
   //儲存轉錄文字
   Future<void> _saveText(String str, String pathToText, int index) async {
-    print("m: Whisper submitText: index=$index, pathToText=$pathToText");
+    // print("m: Whisper submitText: index=$index, pathToText=$pathToText");
     Directory directory = Directory(path.dirname(pathToText));
     try {
       if (!directory.existsSync()) {
@@ -111,7 +110,7 @@ class WhisperViewModel with ChangeNotifier {
       }
       final file = File(pathToText);
       file.writeAsString(str);
-      print("m: 成功寫入 $pathToText");
+      print("m: 文字檔寫入 $pathToText");
       _states[index] = ViewState.textSaved;
     } catch (e) {
       print("m: $e");
@@ -134,24 +133,35 @@ class WhisperViewModel with ChangeNotifier {
     }
   }
 
-  bool ifAllDoneThenSendTextToServer(
-      PathModel pathModel) {
-    bool isDone = true;
+  Future<SubmitState> ifAllDoneThenSendTextToServer(
+      PathModel pathModel, PageController controller) async {
+    SubmitState state = SubmitState.idle;
+
     for (int i = 0; i < questionList.length; i++) {
       if (_states[i] == ViewState.textSaved) {
         continue;
       } else {
-        print("m: ifAllDoneThenSendTextToServer: Not yet.");
-        isDone = false;
-        break;
+        print("m: ifAllDone: Not yet.");
+        return state;
       }
     }
-    if (isDone) {
-      print("m: ifAllDoneThenSendTextToServer: All done. Call submitText.");
-      
-      submitText(pathModel, 0);
-      // submitText(pathModel, 1);
-    }
-    return isDone;
+    print("m: ifAllDone: All done. Call submitText.");
+    await submitText(pathModel, 0).then((value) {
+      state = value;
+      print("m: ifAllDone state=$state");
+      switch (state) {
+        case SubmitState.success:
+          {
+            print("m:跳轉下一頁");
+            controller.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut);
+          }
+        case SubmitState.stringIsBlank:
+          notifyListeners();
+        default:
+      }
+    });
+    return state;
   }
 }

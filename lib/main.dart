@@ -37,8 +37,6 @@ class MyApp extends StatelessWidget {
 }
 
 class _FirstPage extends StatelessWidget {
-  //後端的路由
-  // final String hostUrl = 'http://10.0.2.2:5000/';
 
   @override
   Widget build(BuildContext context) {

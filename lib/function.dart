@@ -1,10 +1,13 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers, avoid_print
+
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:http/http.dart' as http;
-import 'model.dart';
-import 'package:format/format.dart';
-import 'config.dart';
 import 'package:path/path.dart' as path;
+
+import 'config.dart';
+import 'model.dart';
 
 // String fakeDateTime = "2010-01-01-00:00:00";
 
@@ -20,85 +23,113 @@ void submitWav(PathModel pathModel) async {
   }
 }
 
+enum SubmitState {
+  idle,
+  fileNotFound, // 沒作用
+  stringIsBlank, // 執行中
+  success, // 轉錄成功
+  failure, // 加载失败
+}
+
 //合併指定大題中個小題的文字檔，整理成json格式後傳到後端
-void submitText(PathModel pathModel, int index) async {
+Future<SubmitState> submitText(PathModel pathModel, int index) async {
+  String pathToReport = await pathModel.pathToReport(index);
+
   Map<String, dynamic> jsonData = {
     "task_type": taskList[index].task_type,
     "userID": pathModel.userID,
     "user_name": "admin",
-    // "date_time": pathModel.testDateTime, //必須給定一個unique的日期來分辨每一次測驗
     "date_time": pathModel.testDateTime, //! 測試 pathModel.testDateTime
   };
 
   String text = "";
+  bool isDone = false;
 
 //合併各小題文字檔
   for (int i = 0; i < taskList[index].questionNum; i++) {
     File file = File(await pathModel.pathToText(i));
     if (file.existsSync()) {
       text = text + await file.readAsString();
-    } else {}
+    } else {
+      return SubmitState.fileNotFound;
+    }
   }
-  // jsonData["text"] = text;
-  jsonData["text"] =
-      "我家鄉在屏東 然後從出生到高中 都 高中18歲都在屏東 對 回憶嗎 應該說是個很無聊的地方 屏東嗎 我會推薦去 我不會推薦去墾丁 但是我會推薦去山地門啊 或者是屏東市區 對 因為大部分的人都會比較想要去墾丁 像是泡麵、麵包、罐頭類的 那人家有些會準備電池水那些我是不會 應該是大家比較常見到巴巴水災吧 因為那時候屏東還蠻嚴重的 整個都淹水淹進來 但是我們家那邊可能地勢比較高 沒有遇到這個問題 但是那種同學朋友都 放個番茄蛋麵對 就是自己去超市買番茄蛋 跟一些肉啊菜啊 自己回家燉煮 我不會去觀光客的地方 就像人家說的我家巷口 對 就是我出去 就有一家牛肉攤 對 但是那不是觀光客會去吃的 那個開源路 轉角那邊 因為他的牛肉攤 一碗才70塊而已 而且他的蔬果湯 他是不加鹽巴調味料的 就是可能加個冰塊當作水果冰茶就這樣子而已 因為我身體會有一些心肌或晚上睡不著覺 對 所以我就會自己避免掉 就自己開心一下 路嗎 嗯 我都半糖為兵 對 我覺得我不會去推薦 應該說印象深刻不是他的內容 是他講話的風趣 對 電視節目比較多 我 因為我是最近有看那個 就是 妥中她跟 他們一起 合開了一個 對我來說在南部 尤其現在這種氣候 其實沒有很常下雨 所以我覺得往山上跑或者是往 因為我是蠻戶外的人 所以我覺得往外跑就是 天氣來說非常的舒服 不像冬天可能很冷 對 還蠻多的耶";
+  if (text.trim().isEmpty) {
+    return SubmitState.stringIsBlank;
+  } else {
+    try {
+      jsonData["text"] = text;
+      // jsonData["text"] =
+      //     "我家鄉在屏東 然後從出生到高中 都 高中18歲都在屏東 對 回憶嗎 應該說是個很無聊的地方 屏東嗎 我會推薦去 我不會推薦去墾丁 但是我會推薦去山地門啊 或者是屏東市區 對 因為大部分的人都會比較想要去墾丁 像是泡麵、麵包、罐頭類的 那人家有些會準備電池水那些我是不會 應該是大家比較常見到巴巴水災吧 因為那時候屏東還蠻嚴重的 整個都淹水淹進來 但是我們家那邊可能地勢比較高 沒有遇到這個問題 但是那種同學朋友都 放個番茄蛋麵對 就是自己去超市買番茄蛋 跟一些肉啊菜啊 自己回家燉煮 我不會去觀光客的地方 就像人家說的我家巷口 對 就是我出去 就有一家牛肉攤 對 但是那不是觀光客會去吃的 那個開源路 轉角那邊 因為他的牛肉攤 一碗才70塊而已 而且他的蔬果湯 他是不加鹽巴調味料的 就是可能加個冰塊當作水果冰茶就這樣子而已 因為我身體會有一些心肌或晚上睡不著覺 對 所以我就會自己避免掉 就自己開心一下 路嗎 嗯 我都半糖為兵 對 我覺得我不會去推薦 應該說印象深刻不是他的內容 是他講話的風趣 對 電視節目比較多 我 因為我是最近有看那個 就是 妥中她跟 他們一起 合開了一個 對我來說在南部 尤其現在這種氣候 其實沒有很常下雨 所以我覺得往山上跑或者是往 因為我是蠻戶外的人 所以我覺得往外跑就是 天氣來說非常的舒服 不像冬天可能很冷 對 還蠻多的耶";
 
-  try {
-    await sendJsonDataToServer(textUrl, jsonData).then((res) {
-      print('m: 傳送json結果: $res');
-    });
-  } catch (e) {
-    print('m: 傳送json失敗: $e');
-  }
+      await sendJsonDataToServer(textUrl, jsonData).then((res) async {
+        print('m: 傳送json結果: $res');
+        jsonData.remove("text");
 
-  await jsonData.remove("text");
-
-  try {
-    print('m: 要求計算結果中');
-    await fetchJsonResultFromServer(resultUrl, jsonData).then((response) async {
-      print('m: 取得計算結果: ${jsonEncode(response)}');
-      String pathToReport = await pathModel.pathToReport(index);
-      print("m: 儲存json路徑: $pathToReport");
-      _writeJson(response, pathToReport);
-    });
-  } catch (e) {
-    print('m: 取得計算結果失敗: $e');
+        try {
+          print('m: 要求計算結果中');
+          await fetchJsonResultFromServer(resultUrl, jsonData)
+              .then((response) async {
+            // print('m: 取得計算結果: ${jsonEncode(response)}');
+            print("m: 儲存json路徑: $pathToReport");
+            await _writeJson(response, pathToReport).then((value) {
+              isDone = value;
+              print("m: fetch and write isdone: $isDone");
+            });
+          });
+          return isDone;
+        } catch (e) {
+          print('m: 取得計算結果失敗: $e');
+          // return false;
+        }
+      });
+      return SubmitState.success;
+    } catch (e) {
+      print('m: 傳送json失敗: $e');
+      return SubmitState.failure;
+    }
   }
 }
 
 //儲存json數據
-void _writeJson(Map<String, dynamic> _json, String _filePath) async {
+Future<bool> _writeJson(Map<String, dynamic> _json, String _filePath) async {
   //3. Convert _json ->_jsonString
   String _jsonString = jsonEncode(_json);
-  print('3.(_writeJson) _jsonString: $_jsonString\n - \n');
+  // print('3.(_writeJson) _jsonString: $_jsonString\n - \n');
 
   Directory directory = Directory(path.dirname(_filePath));
+  bool isDone = false;
   try {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }
     //4. Write _jsonString to the _filePath
     final file = File(_filePath);
-    file.writeAsString(_jsonString);
+    await file.writeAsString(_jsonString).then((value) {
+      isDone = true;
+      print("m: _writeJson isDone = $isDone");
+    });
     print("m: 儲存json成功");
+    return true;
   } catch (e) {
     print("m: 儲存json失敗: $e");
+    return false;
   }
 }
 
 Future<Map<String, dynamic>> readJson(Future<String> _filePath) async {
   final file = File(await _filePath);
-  Map<String, dynamic> _json = {"test": "initialized"};
+  Map<String, dynamic> _json = {};
 
   // If the _file exists->read it: update initialized _json by what's in the _file
   if (file.existsSync()) {
     try {
       //1. Read _jsonString<String> from the _file.
       String _jsonString = await file.readAsString();
-      print('m: 1.(_readJson) _jsonString: $_jsonString');
+      // print('m: 1.(_readJson) _jsonString: $_jsonString');
 
       //2. Update initialized _json by converting _jsonString<String>->_json<Map>
-      _json = jsonDecode(_jsonString);
+      _json = await jsonDecode(_jsonString);
       print('m: 2.(_readJson) _json: $_json \n - \n');
     } catch (e) {
       // Print exception errors

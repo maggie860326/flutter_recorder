@@ -4,19 +4,22 @@
  */
 
 import 'dart:core';
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:format/format.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:recorder/function.dart';
 import 'config.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 class PathModel {
-  final String userID = "002";
+  String userID = "";
   late String testDateTime;
+
+  String setUserID(input) {
+    userID = input;
+    return userID;
+  }
 
   String setTestDateTime() {
     DateTime now = DateTime.now();
@@ -31,7 +34,7 @@ class PathModel {
   }
 
   Future<String> get pathToModel async {
-    const String path = 'ggml/ggml-tiny.bin';
+    const String path = 'ggml/ggml-base.bin';
     var filePath = "${await appDocPath}/$path";
     var file = File(filePath);
 
@@ -61,16 +64,16 @@ class PathModel {
 
   Future<String> pathToAudio([int? i]) async {
     i ??= index;
-    return "${await appDocPath}/test/${userID}/$testDateTime/recording/${userID}_${questionList[i].task_type}_${format('{:02d}', questionList[i].questionNo!)}.wav";
+    return "${await appDocPath}/test/${userID}/$testDateTime/recording/${userID}_${questionList[i].task_type}_${format('{:02d}', questionList[i].questionNo)}.wav";
   }
 
   Future<String> pathToText([int? i]) async {
     i ??= index;
-    return "${await appDocPath}/test/${userID}/$testDateTime/text/${userID}_${questionList[i].task_type}_${format('{:02d}', questionList[i].questionNo!)}.txt";
+    return "${await appDocPath}/test/${userID}/$testDateTime/text/${userID}_${questionList[i].task_type}_${format('{:02d}', questionList[i].questionNo)}.txt";
   }
 
   Future<String> pathToReport(int i) async {
-    return "${await appDocPath}/test/result/${userID}_${testDateTime}_.json";
+    return "${await appDocPath}/test/result/${userID}_${testDateTime}.json";
   }
 
   PathModel copyWith() {

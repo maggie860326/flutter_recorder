@@ -10,13 +10,16 @@ import 'model.dart';
 import "function.dart";
 
 class RadarChartSample1 extends StatefulWidget {
-  RadarChartSample1({super.key});
+  final String pathToReport;
+  const RadarChartSample1(this.pathToReport);
 
   @override
-  State<RadarChartSample1> createState() => _RadarChartSample1State();
+  State<RadarChartSample1> createState() =>
+      _RadarChartSample1State(pathToReport);
 }
 
 class _RadarChartSample1State extends State<RadarChartSample1> {
+  final String pathToReport;
   int selectedDataSetIndex = -1;
   double angleValue = 0;
   bool relativeAngleMode = true;
@@ -38,26 +41,14 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
     (0.044, 0.099)
   ];
 
-  late Future<String> pathToReport;
-
-  @override
-  void initState() {
-    pathToReport = getPathToReport();
-    super.initState();
-
-    print("m: initialized.\n");
-  }
+  _RadarChartSample1State(this.pathToReport);
 
   @override
   Widget build(BuildContext context) {
-    // PathModel pathModel = Provider.of<PathModel>(context, listen: false);
-    // Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    // String pathToReport = '${documentsDirectory.path}/test/result';
-    // Future<String> pathToReport = pathModel.pathToReport(0);
-
     return Scaffold(
+        appBar: AppBar(title: const Text("測驗報告")),
         body: FutureBuilder<Map<String, dynamic>>(
-            future: readJson(pathToReport),
+            future: readJson(Future.value(pathToReport)),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               // 请求已结束
               if (snapshot.connectionState == ConnectionState.done) {
@@ -65,15 +56,15 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                   // 请求失败，显示错误
                   return Text("Error: ${snapshot.error}");
                 } else {
-                  List<String> keyList =
+                  final List<String> keyList =
                       snapshot.data['normal_status_dic'].keys.toList();
 
                   final List<String> titles = getFeatureList(snapshot.data);
-                  // 请求成功，显示数据
+                  //! 请求成功，显示数据
                   return Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         GestureDetector(
@@ -82,10 +73,10 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                                 selectedDataSetIndex = -1;
                               });
                             },
-                            child: const Text(
-                              '測驗報告',
-                              style: TextStyle(
-                                fontSize: 32,
+                            child: Text(
+                              "${basenameWithoutExtension(pathToReport)}",
+                              style: const TextStyle(
+                                fontSize: 25,
                                 fontWeight: FontWeight.w300,
                                 color: Colors.black,
                               ),
@@ -205,22 +196,25 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                                   const Duration(milliseconds: 2000),
                               swapAnimationCurve: Curves.linear,
                             )),
-                        Container(
-                          height: 200,
-                          child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemCount:
-                                  snapshot.data["normal_status_dic"].length,
-                              itemBuilder: (context, index) {
-                                String key = keyList[index];
-                                return Text(
-                                  "${key} : ${snapshot.data["normal_status_dic"][key]}",
-                                  style: TextStyle(
-                                      fontSize: 18, color: Colors.black),
-                                );
-                              }),
-                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                          child: Container(
+                            height: 200,
+                            child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount:
+                                    snapshot.data["normal_status_dic"].length,
+                                itemBuilder: (context, index) {
+                                  String key = keyList[index];
+                                  return Text(
+                                    "${key} : ${snapshot.data["normal_status_dic"][key]}",
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.black),
+                                  );
+                                }),
+                          ),
+                        )
                       ]);
                 }
               } else {

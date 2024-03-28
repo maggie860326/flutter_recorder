@@ -73,14 +73,15 @@ class _ReportListPageState extends State<ReportListPage> {
                   ],
                 ),
                 child: ListTile(
-                    title: Text(basename(fileList[index].path)),
+                    title: Text(
+                        "${basenameWithoutExtension(fileList[index].path)} 的測驗報告"),
                     onTap: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => Provider<PathModel>(
                               create: (ctx) => PathModel(),
-                              child: RadarChartSample1(),
+                              child: RadarChartSample1(fileList[index].path),
                             ),
                           ));
                     }),
@@ -89,14 +90,14 @@ class _ReportListPageState extends State<ReportListPage> {
   }
 
 /* 本頁面會用到的 function */
-  getFileList() async {
+  Future<List> getFileList() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = '${documentsDirectory.path}/test/result';
     print("m: 遍歷路徑 $path");
     setState(() {
       fileList = Directory(path).listSync();
-      print("m: ${fileList.length}");
     });
+    return fileList;
   }
 
   void doNothing() {

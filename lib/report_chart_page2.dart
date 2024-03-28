@@ -50,15 +50,15 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                   // 请求失败，显示错误
                   return Text("Error: ${snapshot.error}");
                 } else {
-                  List<String> keyList =
+                  final List<String> keyList =
                       snapshot.data['normal_status_dic'].keys.toList();
 
                   final List<String> titles = getFeatureList(snapshot.data);
-                  // 请求成功，显示数据
+                  //! 请求成功，显示数据
                   return Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         GestureDetector(
