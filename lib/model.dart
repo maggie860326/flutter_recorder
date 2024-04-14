@@ -34,7 +34,7 @@ class PathModel {
   }
 
   Future<String> get pathToModel async {
-    const String path = 'ggml/ggml-base.bin';
+    const String path = 'ggml/ggml-base-q8_0.bin';
     var filePath = "${await appDocPath}/$path";
     var file = File(filePath);
 
