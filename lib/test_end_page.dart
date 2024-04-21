@@ -1,13 +1,15 @@
 // ignore_for_file: avoid_print
 
+/*
+View: 顯示各題錄音檔轉錄為文字的進度
+當全部轉錄完成時，自動將文字檔傳送到後端->請求語言特徵分數->跳轉到報告頁面
+*/
+
 import 'package:flutter/material.dart';
 import 'package:recorder/function.dart';
-
-// import 'package:permission_handler/permission_handler.dart';
 import 'package:recorder/model.dart';
 import 'package:recorder/view_model.dart';
 import 'package:provider/provider.dart';
-
 import 'config.dart';
 
 class TestEndPage extends StatelessWidget {
@@ -15,8 +17,6 @@ class TestEndPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // List<Question> questionList = task_1_Q + task_2_Q;
-
     PathModel pathModel = Provider.of<PathModel>(context, listen: false);
     PageController controller =
         Provider.of<PageController>(context, listen: false);
@@ -24,7 +24,8 @@ class TestEndPage extends StatelessWidget {
     WhisperViewModel whisperVM =
         Provider.of<WhisperViewModel>(context, listen: false);
 
-    whisperVM.checkTextSaved(pathModel); //檢查已存成文字檔的文件
+    //檢查有沒有已存成文字檔的文件，function 內容定義在 view_model.dart 的 WhisperViewModel
+    whisperVM.checkTextSaved(pathModel);
     SubmitState submitState = SubmitState.idle;
 
     return Scaffold(
@@ -53,6 +54,7 @@ class TestEndPage extends StatelessWidget {
             child: Consumer<WhisperViewModel>(
               builder: (context, viewModel, child) {
                 if (submitState == SubmitState.idle) {
+                  //檢查音檔轉錄為文字的進度，function 內容定義在 view_model.dart 的 WhisperViewModel
                   whisperVM
                       .ifAllDoneThenSendTextToServer(pathModel, controller)
                       .then((value) {
@@ -62,6 +64,7 @@ class TestEndPage extends StatelessWidget {
                 }
                 return Column(
                   children: [
+                    //用 ListView 顯示每一題的轉錄狀態
                     ListView.builder(
                         scrollDirection: Axis.vertical,
                         shrinkWrap: true,
@@ -76,6 +79,7 @@ class TestEndPage extends StatelessWidget {
                     const SizedBox(
                       height: 40,
                     ),
+                    //如果有音檔轉錄出來是空字串，則顯示下列警告
                     Offstage(
                         offstage: submitState != SubmitState.stringIsBlank,
                         child: const Text("錄音內容不可為空，請重新作答。",

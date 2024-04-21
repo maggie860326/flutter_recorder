@@ -1,6 +1,7 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names
 /*
- Model的职责：Model只负责封装数据，不做任何其它操作。
+ PathModel：Model只負責處理在整個 app 中共用的數據。
+ userID, testDateTime, appDocPath
+ 音檔、文字檔、報告分數的儲存路徑
  */
 
 import 'dart:core';

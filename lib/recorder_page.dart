@@ -1,4 +1,8 @@
-// ignore_for_file: avoid_print, file_names
+/*
+View: 錄音的頁面
+包含題目敘述、錄音按鈕、下一題按鈕
+如果要修改題目敘述和圖片，請到 config.dart 中 修改 task_#_description
+*/
 
 import 'dart:async';
 import 'dart:io';
@@ -35,26 +39,17 @@ class _RecorderPageState extends State<RecorderPage> {
     required this.index,
   });
 
-  //recorder 相關變數
+  //設定 recorder 相關變數
   FlutterSoundRecorder? myRecorder = FlutterSoundRecorder();
   StreamSubscription? _recorderSubscription;
   final recordingPlayer = AssetsAudioPlayer();
   String _recorderState = "準備好後請按下按鈕";
-  bool _playAudio = false;
-  bool _isRecording = false;
-  bool _isOver1Min = true;
-  bool invisible = false;
+  bool _playAudio = false; //用來控制 播放/停止播放 按鈕作用
+  bool _isRecording = false; //用來控制 錄音/停止錄音 按鈕作用
+  bool _isOver1Min = true; //錄音時間是否超過一分鐘
+  bool invisible = false; //隱藏或顯示下一題按鈕
 
-  String _timerText = '';
-
-  List<String> questions = [
-    "請您跟我聊聊您的家鄉，\n您的家鄉在哪呢？您到目前為止在您的家鄉住的時間久嗎？有什麼回憶嗎？",
-    "若在台灣有颱風預報時，通常會需要準備什麼？發生什麼事？",
-    "請問您昨天晚餐在哪裡吃飯？吃什麼？請描述細節及內容。",
-    "若您想要泡一杯茶或咖啡，您會怎麼做？請描述細節及內容。",
-    "請您跟我聊聊您最近喜歡看的節目是什麼？ 從電視、Youtube或廣播",
-    "一年中的四季，您最喜歡哪一個季節？為什麼？",
-  ];
+  String _timerText = ''; //計時器
 
   @override
   void initState() {
@@ -93,17 +88,15 @@ class _RecorderPageState extends State<RecorderPage> {
   @override
   Widget build(BuildContext context) {
     // print("m: 第 $index 頁 build");
-    // List<Question> questionList = task_1_Q + task_2_Q;
 
     PathModel pathModel = Provider.of<PathModel>(context, listen: false);
     pathModel.index = index;
     Future<String> pathToAudio = pathModel.pathToAudio();
     String? imagePath = questionList[index].imagePath;
-    // String? question = questionList[index].description;
 
     List<Widget> question = [
       Text(
-        questionList[index].description!, //! 代入題目描述
+        questionList[index].description, //! 代入題目描述
         style: const TextStyle(fontSize: 20, color: Colors.black),
       ),
     ];
@@ -120,7 +113,6 @@ class _RecorderPageState extends State<RecorderPage> {
           const SizedBox(
             height: 20,
           ),
-          // height: 50,
           Text(
             "${questionList[index].task_name}${questionList[index].questionNo}", //! 代入題目編號
             style: const TextStyle(fontSize: 20, color: Colors.black),
@@ -129,7 +121,6 @@ class _RecorderPageState extends State<RecorderPage> {
           Container(
             padding: const EdgeInsets.all(0),
             margin: const EdgeInsets.all(20),
-            // height: 150,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.blue, width: 0.5),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
@@ -153,6 +144,7 @@ class _RecorderPageState extends State<RecorderPage> {
           const SizedBox(
             height: 20,
           ),
+          //! 錄音/停止錄音按鈕
           Offstage(
             offstage: invisible,
             child: FloatingActionButton.large(
@@ -167,15 +159,15 @@ class _RecorderPageState extends State<RecorderPage> {
                   });
                   startRecording(pathToAudio);
                 } else {
-                  //! 控制1分鐘才能按停止
-                  // if (_isOver1Min) {
-                  setState(() {
-                    _recorderState = "準備好後請按下按鈕";
-                    _isRecording = !_isRecording;
-                    invisible = true;
-                  });
-                  stopRecording();
-                  // } else {}
+                  //! 控制1分鐘才能按停止按鈕
+                  if (_isOver1Min) {
+                    setState(() {
+                      _recorderState = "準備好後請按下按鈕";
+                      _isRecording = !_isRecording;
+                      invisible = true;
+                    });
+                    stopRecording();
+                  } else {}
                 }
               },
               child: _isRecording
@@ -188,7 +180,7 @@ class _RecorderPageState extends State<RecorderPage> {
           const SizedBox(
             height: 20,
           ),
-          //播放錄音檔
+          //! 播放/停止播放按鈕
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
                 elevation: 9.0, backgroundColor: Colors.red),
@@ -252,6 +244,7 @@ class _RecorderPageState extends State<RecorderPage> {
 
   Future<void> startRecording(Future<String> pathToAudio) async {
     Directory directory = Directory(path.dirname(await pathToAudio));
+    //如果目錄不存在就創建目錄
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }

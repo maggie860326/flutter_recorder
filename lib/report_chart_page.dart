@@ -1,19 +1,21 @@
+/*
+View: 繪製雷達圖的頁面
+*/
+
 import 'package:flutter/material.dart';
-// import 'dart:io';
-import 'package:path/path.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'model.dart';
 import "function.dart";
 
-class RadarChartSample1 extends StatefulWidget {
-  RadarChartSample1({super.key});
+class RadarChartPage extends StatefulWidget {
+  RadarChartPage({super.key});
 
   @override
-  State<RadarChartSample1> createState() => _RadarChartSample1State();
+  State<RadarChartPage> createState() => _RadarChartPageState();
 }
 
-class _RadarChartSample1State extends State<RadarChartSample1> {
+class _RadarChartPageState extends State<RadarChartPage> {
   int selectedDataSetIndex = -1;
   double angleValue = 0;
   bool relativeAngleMode = true;
@@ -61,6 +63,7 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                         const SizedBox(
                           height: 20,
                         ),
+                        //偵測使用者點選哪個項目
                         GestureDetector(
                             onTap: () {
                               setState(() {
@@ -144,6 +147,7 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                               .toList(),
                         ),
                         const SizedBox(height: 40),
+                        //! 雷達圖
                         AspectRatio(
                             aspectRatio: 1.3,
                             child: RadarChart(
@@ -178,7 +182,7 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                                 radarBorderData:
                                     const BorderSide(color: Colors.transparent),
                                 titlePositionPercentageOffset: 0.2,
-                                titleTextStyle: TextStyle(
+                                titleTextStyle: const TextStyle(
                                     color: Colors.black, fontSize: 14),
                                 getTitle: (index, angle) {
                                   return RadarChartTitle(
@@ -192,7 +196,7 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                             )),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                          child: Container(
+                          child: SizedBox(
                             height: 200,
                             child: ListView.builder(
                                 scrollDirection: Axis.vertical,
@@ -202,8 +206,8 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
                                 itemBuilder: (context, index) {
                                   String key = keyList[index];
                                   return Text(
-                                    "${key} : ${snapshot.data["normal_status_dic"][key]}",
-                                    style: TextStyle(
+                                    "$key : ${snapshot.data["normal_status_dic"][key]}",
+                                    style: const TextStyle(
                                         fontSize: 18, color: Colors.black),
                                   );
                                 }),
@@ -219,14 +223,25 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
   }
 
 /* functions */
-  List<String> getFeatureList(Map<String, dynamic> _json) {
-    List<String> keyList = _json['norm_and_data_dic'].keys.toList();
+
+//取得15個語言特徵的名稱 list
+  List<String> getFeatureList(Map<String, dynamic> json) {
+    List<String> keyList = json['norm_and_data_dic'].keys.toList();
     print("m: $keyList");
     return keyList;
   }
 
-  List<RadarDataSet> showingDataSets(Map<String, dynamic> _json) {
-    return getRawDataSets(_json).asMap().entries.map((entry) {
+  //從 json 取得資料，並分成使用者和常模的分數
+  List<RawDataSet> getRawDataSets(Map<String, dynamic> json) {
+    return [
+      RawDataSet.fromJson(json, "data"), //使用者的分數
+      RawDataSet.fromJson(json, "norm") //常模的平均分數
+    ];
+  }
+
+//對
+  List<RadarDataSet> showingDataSets(Map<String, dynamic> json) {
+    return getRawDataSets(json).asMap().entries.map((entry) {
       final index = entry.key;
       final rawDataSet = entry.value;
 
@@ -249,15 +264,9 @@ class _RadarChartSample1State extends State<RadarChartSample1> {
       );
     }).toList();
   }
-
-  List<RawDataSet> getRawDataSets(Map<String, dynamic> _json) {
-    return [
-      RawDataSet.fromJson(_json, "data"),
-      RawDataSet.fromJson(_json, "norm")
-    ];
-  }
 }
 
+//定義雷達圖要使用的資料格式
 class RawDataSet {
   String? title;
   Color color = Colors.black;
@@ -269,11 +278,12 @@ class RawDataSet {
     required this.values,
   });
 
-  RawDataSet.fromJson(Map<String, dynamic> _json, String data) {
+  //從 json import 資料的建構式
+  RawDataSet.fromJson(Map<String, dynamic> json, String data) {
     title = (data == "norm") ? "平均值" : "我的分數";
     color = (data == "norm") ? Colors.blue : Colors.orange;
 
-    _json["norm_and_data_dic"].forEach((k, v) {
+    json["norm_and_data_dic"].forEach((k, v) {
       values.add(v[data]);
     });
     print("m: $title : $values");

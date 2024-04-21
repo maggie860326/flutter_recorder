@@ -1,3 +1,8 @@
+/*
+View: 測驗指導語頁面
+安插在每一大題開始之前
+*/
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +12,7 @@ class TestInstructionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //取得 PageView 控制
     PageController controller = Provider.of<PageController>(context);
 
     return Scaffold(

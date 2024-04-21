@@ -1,6 +1,13 @@
 // ignore_for_file: avoid_print
 
-import 'package:cool_alert/cool_alert.dart';
+/*
+WhisperViewModel: 集合與 Whisper 相關的所有functions
+runWhisper
+_saveText
+checkTextSaved
+ifAllDoneThenSendTextToServer
+ */
+
 import 'package:flutter/material.dart';
 import 'model.dart';
 import 'dart:io';
@@ -9,60 +16,28 @@ import 'function.dart';
 import 'package:path/path.dart' as path;
 import 'config.dart';
 
+//定義 whisper 轉錄狀態
 enum ViewState {
   idle, // 沒作用
   running, // 執行中
   success, // 轉錄成功
-  failure, // 加载失败
+  failure, // 轉錄失敗
   textSaved, //已儲存文字檔
 }
 
-// List<Question> questionList = task_1_Q;
-
-// 用來保存每個whisper的運作狀態
 class WhisperViewModel with ChangeNotifier {
-  List<ViewState> _states =
+  final List<ViewState> _states =
       List.generate(questionList.length, (i) => ViewState.idle);
 
   List<ViewState> get states => _states;
 
-  // set isRunning(int index) {
-  //   _states[index] = ViewState.running;
-  //   notifyListeners();
-  // }
-
-  // set isSuccess(int index) {
-  //   _states[index] = ViewState.success;
-  //   notifyListeners();
-  // }
-
-//執行Whisper
+//! 執行Whisper
   Future<void> runWhisper(BuildContext context, PathModel pathModel) async {
-    // PathModel pathModel = pathModel.copyWith();
     File audioFile = File(await pathModel.pathToAudio());
     File modelFile = File(await pathModel.pathToModel);
     int index = pathModel.index;
     String pathToText = await pathModel.pathToText();
 
-    // //檢查 audio 檔案是否存在
-    // if (!audioFile.existsSync()) {
-    //   await CoolAlert.show(
-    //     context: context,
-    //     type: CoolAlertType.info,
-    //     text: "找不到此音檔",
-    //   );
-    //   print("m: audio is empty");
-    //   return;
-    // } //檢查 model 檔案是否存在
-    // else if (!modelFile.existsSync()) {
-    //   await CoolAlert.show(
-    //       context: context, type: CoolAlertType.info, text: "找不到此 model");
-    //   // print("m: model is empty");
-    //   return;
-    // }
-
-// Whisper
-    // print("m: Whisper start transcribe");
     DateTime startTimestamp = DateTime.now();
     Whisper whisper = Whisper(
       whisperLib: "libwhisper.so",
@@ -72,7 +47,7 @@ class WhisperViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
-      //真正執行 whisper 的地方
+      //真正執行 whisper 的地方，whisper.request會建立新的 isolate 來執行轉錄作業
       var res = await whisper.request(
         whisperRequest: WhisperRequest.fromWavFile(
             audio: audioFile,
@@ -100,7 +75,7 @@ class WhisperViewModel with ChangeNotifier {
     return;
   }
 
-  //儲存轉錄文字
+  //! 儲存轉錄好的字串為 txt file
   Future<void> _saveText(String str, String pathToText, int index) async {
     // print("m: Whisper submitText: index=$index, pathToText=$pathToText");
     Directory directory = Directory(path.dirname(pathToText));
@@ -117,7 +92,7 @@ class WhisperViewModel with ChangeNotifier {
     }
   }
 
-//確認有沒有已經存好的文字檔，如果有則將其狀態設為 textSaved
+//! 確認有沒有已經存好的文字檔，如果有則將其狀態設為 textSaved
   void checkTextSaved(PathModel pathModel) async {
     print("m: 檢查已存在的文字檔");
     for (int i = 0; i < questionList.length; i++) {
@@ -133,10 +108,12 @@ class WhisperViewModel with ChangeNotifier {
     }
   }
 
+//! 檢查音檔轉錄為文字的進度，如果都完成則傳送文字檔到後端
   Future<SubmitState> ifAllDoneThenSendTextToServer(
       PathModel pathModel, PageController controller) async {
     SubmitState state = SubmitState.idle;
 
+    //for loop: 檢查是不是每一題都轉錄完成
     for (int i = 0; i < questionList.length; i++) {
       if (_states[i] == ViewState.textSaved) {
         continue;
@@ -145,11 +122,14 @@ class WhisperViewModel with ChangeNotifier {
         return state;
       }
     }
+    //轉錄都完成，傳送文字檔到後端
     print("m: ifAllDone: All done. Call submitText.");
+    //submitText 定義在 function.dart 中
     await submitText(pathModel, 0).then((value) {
       state = value;
       print("m: ifAllDone state=$state");
       switch (state) {
+        //如果傳送成功，則跳到報告頁面
         case SubmitState.success:
           {
             print("m:跳轉下一頁");
@@ -157,6 +137,7 @@ class WhisperViewModel with ChangeNotifier {
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut);
           }
+        //如果字串為空，則通知監聽者(刷新TestEndPage的轉錄狀態列表)
         case SubmitState.stringIsBlank:
           notifyListeners();
         default:

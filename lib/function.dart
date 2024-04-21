@@ -1,16 +1,13 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers, avoid_print
+/*這份文件包含與後端溝通的functions*/
 
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-
 import 'config.dart';
 import 'model.dart';
 
-// String fakeDateTime = "2010-01-01-00:00:00";
-
+//傳送一個音檔給後端
 void submitWav(PathModel pathModel) async {
   File wavFile = File(await pathModel.pathToAudio());
   if (wavFile.existsSync()) {
@@ -23,15 +20,16 @@ void submitWav(PathModel pathModel) async {
   }
 }
 
+//定義 submitText 的執行狀態
 enum SubmitState {
-  idle,
-  fileNotFound, // 沒作用
-  stringIsBlank, // 執行中
-  success, // 轉錄成功
-  failure, // 加载失败
+  idle, //沒作用
+  fileNotFound, // 找不到檔案
+  stringIsBlank, // 轉錄出來的字串為空
+  success, // 成功
+  failure, // 失败
 }
 
-//合併指定大題中個小題的文字檔，整理成json格式後傳到後端
+//合併指定大題中所有小題的轉錄文字，整理成json格式後傳到後端
 Future<SubmitState> submitText(PathModel pathModel, int index) async {
   String pathToReport = await pathModel.pathToReport(index);
 
@@ -45,7 +43,7 @@ Future<SubmitState> submitText(PathModel pathModel, int index) async {
   String text = "";
   bool isDone = false;
 
-//合併各小題文字檔
+  //for loop: 合併所有小題的轉錄文字為一個字串
   for (int i = 0; i < taskList[index].questionNum; i++) {
     File file = File(await pathModel.pathToText(i));
     if (file.existsSync()) {
@@ -59,6 +57,7 @@ Future<SubmitState> submitText(PathModel pathModel, int index) async {
   } else {
     try {
       jsonData["text"] = text;
+      // //debug 用的假資料
       // jsonData["text"] =
       //     "我家鄉在屏東 然後從出生到高中 都 高中18歲都在屏東 對 回憶嗎 應該說是個很無聊的地方 屏東嗎 我會推薦去 我不會推薦去墾丁 但是我會推薦去山地門啊 或者是屏東市區 對 因為大部分的人都會比較想要去墾丁 像是泡麵、麵包、罐頭類的 那人家有些會準備電池水那些我是不會 應該是大家比較常見到巴巴水災吧 因為那時候屏東還蠻嚴重的 整個都淹水淹進來 但是我們家那邊可能地勢比較高 沒有遇到這個問題 但是那種同學朋友都 放個番茄蛋麵對 就是自己去超市買番茄蛋 跟一些肉啊菜啊 自己回家燉煮 我不會去觀光客的地方 就像人家說的我家巷口 對 就是我出去 就有一家牛肉攤 對 但是那不是觀光客會去吃的 那個開源路 轉角那邊 因為他的牛肉攤 一碗才70塊而已 而且他的蔬果湯 他是不加鹽巴調味料的 就是可能加個冰塊當作水果冰茶就這樣子而已 因為我身體會有一些心肌或晚上睡不著覺 對 所以我就會自己避免掉 就自己開心一下 路嗎 嗯 我都半糖為兵 對 我覺得我不會去推薦 應該說印象深刻不是他的內容 是他講話的風趣 對 電視節目比較多 我 因為我是最近有看那個 就是 妥中她跟 他們一起 合開了一個 對我來說在南部 尤其現在這種氣候 其實沒有很常下雨 所以我覺得往山上跑或者是往 因為我是蠻戶外的人 所以我覺得往外跑就是 天氣來說非常的舒服 不像冬天可能很冷 對 還蠻多的耶";
 
@@ -91,9 +90,9 @@ Future<SubmitState> submitText(PathModel pathModel, int index) async {
   }
 }
 
-//儲存json數據
+//儲存json數據在手機本地路徑
 Future<bool> _writeJson(Map<String, dynamic> _json, String _filePath) async {
-  //3. Convert _json ->_jsonString
+  //Convert _json ->_jsonString
   String _jsonString = jsonEncode(_json);
   // print('3.(_writeJson) _jsonString: $_jsonString\n - \n');
 
@@ -117,6 +116,7 @@ Future<bool> _writeJson(Map<String, dynamic> _json, String _filePath) async {
   }
 }
 
+//從手機本地路徑讀取json數據
 Future<Map<String, dynamic>> readJson(Future<String> _filePath) async {
   final file = File(await _filePath);
   Map<String, dynamic> _json = {};
@@ -130,7 +130,7 @@ Future<Map<String, dynamic>> readJson(Future<String> _filePath) async {
 
       //2. Update initialized _json by converting _jsonString<String>->_json<Map>
       _json = await jsonDecode(_jsonString);
-      print('m: 2.(_readJson) _json: $_json \n - \n');
+      print('m: (_readJson) _json: $_json \n - \n');
     } catch (e) {
       // Print exception errors
       print('m: Tried reading _file error: $e');
@@ -140,9 +140,12 @@ Future<Map<String, dynamic>> readJson(Future<String> _filePath) async {
   return _json;
 }
 
-/* 以下是執行 http post 的 function */
+/*
+以下是執行 http post 的 functions
+由後端開發者制定，前端開發者勿隨意更動
+*/
 
-// 傳送JSON
+// 傳送轉錄文字的JSON
 Future<String> sendJsonDataToServer(
     String url, Map<String, dynamic> jsonData) async {
   try {
@@ -188,7 +191,7 @@ Future<String> sendWavFileToServer(
   }
 }
 
-// 取得雷達圖
+// 取得後端畫好的雷達圖png
 Future<String> sendPngRequestToServer(String url) async {
   try {
     final response = await http.get(Uri.parse(url));
@@ -205,7 +208,7 @@ Future<String> sendPngRequestToServer(String url) async {
   }
 }
 
-// 取得結果
+// 取得15個語言特徵的分數
 Future<Map<String, dynamic>> fetchJsonResultFromServer(
     String url, Map<String, dynamic> authData) async {
   try {
