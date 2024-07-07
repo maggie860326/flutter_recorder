@@ -160,14 +160,14 @@ class _RecorderPageState extends State<RecorderPage> {
                   startRecording(pathToAudio);
                 } else {
                   //! 控制1分鐘才能按停止按鈕
-                  if (_isOver1Min) {
-                    setState(() {
-                      _recorderState = "準備好後請按下按鈕";
-                      _isRecording = !_isRecording;
-                      invisible = true;
-                    });
-                    stopRecording();
-                  } else {}
+                  // if (_isOver1Min) {
+                  setState(() {
+                    _recorderState = "準備好後請按下按鈕";
+                    _isRecording = !_isRecording;
+                    invisible = true;
+                  });
+                  stopRecording();
+                  // } else {}
                 }
               },
               child: _isRecording
@@ -293,7 +293,8 @@ class _RecorderPageState extends State<RecorderPage> {
 
   Future<void> playFunc(Future<String> pathToAudio) async {
     try {
-      recordingPlayer.open(
+      print("m: Playing ${await pathToAudio}");
+      await recordingPlayer.open(
         Audio.file(await pathToAudio),
         autoStart: true,
         showNotification: true,
