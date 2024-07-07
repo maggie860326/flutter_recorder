@@ -94,7 +94,12 @@ class _ReportListPageState extends State<ReportListPage> {
   Future<List> getFileList() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = '${documentsDirectory.path}/test/result';
+    // String path ='${documentsDirectory.path}/test/0000/2000-01-01-00-00-00/recording';
+
     print("m: 遍歷路徑 $path");
+    if (!Directory(path).existsSync()) {
+      Directory(path).createSync(recursive: true);
+    }
     setState(() {
       fileList = Directory(path).listSync();
     });
