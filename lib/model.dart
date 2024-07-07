@@ -24,8 +24,8 @@ class PathModel {
 
   String setTestDateTime() {
     DateTime now = DateTime.now();
-    testDateTime = DateFormat('yyyy-MM-dd-kk:mm:ss').format(now);
-    // testDateTime = "2000-01-01-00:00:00";
+    testDateTime = DateFormat('yyyy-MM-dd-kk-mm-ss').format(now);
+    // testDateTime = "2000-01-01-00-00-00";
     return testDateTime;
   }
 
