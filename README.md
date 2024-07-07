@@ -1,10 +1,7 @@
 語言異常快速篩檢 APP
 ===
 
->目錄
->[TOC]
 
-<!-- {%hackmd WOHxcHoOT_qFht3ohClepw %} -->
 <style>
     img{
         margin:auto;
@@ -99,6 +96,7 @@ $ git clone https://github.com/maggie860326/flutter_recorder.git
 - 測驗指導語頁面，安插在每一大題開始之前
 
 <img src="https://hackmd.io/_uploads/SJtBXpfZ0.jpg" height="400" >
+
 ### recorder_page.dart
 - 錄音的頁面，包含題目敘述、錄音按鈕、下一題按鈕。
 
